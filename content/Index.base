@@ -1,0 +1,5 @@
+views:
+  - type: cards
+    name: Table
+    imageAspectRatio: 1
+    cardSize: 160

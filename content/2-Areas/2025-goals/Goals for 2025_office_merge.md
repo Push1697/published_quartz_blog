@@ -1,0 +1,3 @@
+- [ ] start job hunting in a product base company as a cloud engineer or cloud support 
+- [ ] Prepare DevOps in over 3 Months and look for new job. 
+- [ ] 

@@ -1,0 +1,3 @@
+- [ ] setup social media name as overflowbyte
+- [ ] start Instagram and content creation 
+- [ ] study the designs and ways to implement them
