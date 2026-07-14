@@ -1,7 +1,7 @@
 # Deploy Script for Quartz Blog
 param (
     [string]$CommitMessage = "Content update",
-    [string]$VaultPath = "C:\Users\Pushpendra\Documents\obsidian\zettelkasten"
+    [string]$VaultPath = "$env:USERPROFILE\Dropbox\Obsidian\zettelkasten"
 )
 
 $quartzDir = "C:\Users\Pushpendra\Documents\obsidian\quartz_blog"
@@ -13,12 +13,14 @@ Write-Host "Step 1: Syncing published notes from vault..." -ForegroundColor Cyan
 # Clear content directory (except .git if exists)
 Get-ChildItem -Path $contentDir -Exclude ".git*" | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
-# Copy only files with publish: true
+# Copy only files with BOTH publish: true (public-safe, per the checklist)
+# AND garden: true (explicitly opted into the digital garden, separate from
+# the Hashnode blog which is published manually per-post instead)
 $publishedCount = 0
 Get-ChildItem -Path $VaultPath -Recurse -Filter "*.md" | ForEach-Object {
     try {
         $content = Get-Content $_.FullName -Raw -ErrorAction Stop
-        if ($content -match "publish:\s*true") {
+        if ($content -match "publish:\s*true" -and $content -match "garden:\s*true") {
             $relativePath = $_.FullName.Replace($VaultPath, "").TrimStart("\")
             $destination = Join-Path $contentDir $relativePath
             
