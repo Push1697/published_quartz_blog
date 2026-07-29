@@ -1,0 +1,104 @@
+.garden-nav {
+  margin-top: 0.35rem;
+
+  .garden-nav-label {
+    margin: 0 0 0.5rem;
+    color: var(--gray);
+    font-family: var(--codeFont);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    padding: 0.58rem 0.7rem;
+    color: var(--darkgray);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      color 160ms ease,
+      border-color 160ms ease,
+      background-color 160ms ease,
+      transform 160ms ease;
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--secondary) 38%, var(--lightgray));
+      background: var(--highlight);
+      color: var(--secondary);
+      transform: translateX(3px);
+    }
+
+    &.active {
+      border-color: color-mix(in srgb, var(--secondary) 45%, var(--lightgray));
+      background: linear-gradient(
+        100deg,
+        color-mix(in srgb, var(--secondary) 15%, transparent),
+        color-mix(in srgb, var(--tertiary) 9%, transparent)
+      );
+      color: var(--secondary);
+    }
+  }
+
+  .garden-nav-icon {
+    display: grid;
+    width: 1.15rem;
+    flex: 0 0 1.15rem;
+    place-items: center;
+    color: var(--secondary);
+    font-family: var(--codeFont);
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 800px) {
+  .garden-nav {
+    width: calc(100vw - 2rem);
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .garden-nav-label {
+      display: none;
+    }
+
+    ul {
+      width: max-content;
+      flex-direction: row;
+      gap: 0.4rem;
+    }
+
+    a {
+      gap: 0.4rem;
+      border-color: var(--lightgray);
+      padding: 0.48rem 0.68rem;
+      white-space: nowrap;
+
+      &:hover {
+        transform: translateY(-1px);
+      }
+    }
+  }
+}

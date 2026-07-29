@@ -55,5 +55,15 @@ description: Field notes on cloud infrastructure, DevOps, Linux, automation, and
   </a>
 </div>
 
+<section id="about" class="garden-about">
+  <p class="garden-eyebrow">ABOUT THIS GARDEN</p>
+  <h2>Knowledge that grows through practice.</h2>
+  <p>I'm Pushpendra, a server and cloud engineer working across AWS, Kubernetes, Linux, automation, and production operations. OverflowByte Learning Garden is where I turn troubleshooting sessions, architecture decisions, and hands-on experiments into reusable technical notes.</p>
+  <div class="garden-about-links">
+    <a href="https://pushpendra.overflowbyte.cloud">About me & experience ↗</a>
+    <a href="https://blog.overflowbyte.cloud">Read polished articles ↗</a>
+  </div>
+</section>
+
 > [!note] A garden, not a feed
 > Notes evolve as my understanding improves. For polished long-form articles, visit [blog.overflowbyte.cloud](https://blog.overflowbyte.cloud).
