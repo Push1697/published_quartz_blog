@@ -67,12 +67,21 @@ body {
 
 article {
   line-height: 1.78;
+  overflow-wrap: anywhere;
 }
 
 article h1,
 article h2,
 article h3 {
   letter-spacing: -0.025em;
+}
+
+article hr {
+  height: 0;
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--lightgray);
+  background: transparent;
 }
 
 .article-title {
@@ -106,6 +115,69 @@ pre {
   border: 1px solid color-mix(in srgb, var(--secondary) 25%, var(--lightgray));
   border-radius: 0.8rem;
   box-shadow: 0 18px 45px rgba(2, 6, 23, 0.12);
+}
+
+pre:has(> code.mermaid) {
+  min-height: 14rem;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--secondary) 30%, var(--lightgray));
+  background:
+    linear-gradient(
+      color-mix(in srgb, var(--light) 96%, transparent),
+      color-mix(in srgb, var(--light) 96%, transparent)
+    ),
+    radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.12), transparent 22rem);
+  padding: 1rem;
+}
+
+code.mermaid {
+  display: flex;
+  min-width: max-content;
+  min-height: 12rem;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+code.mermaid svg {
+  display: block;
+  width: auto;
+  max-width: min(100%, 70rem);
+  height: auto;
+  margin: auto;
+}
+
+article img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  border: 1px solid var(--lightgray);
+  border-radius: 0.8rem;
+  background: #fff;
+  box-shadow: 0 14px 35px rgba(2, 6, 23, 0.14);
+}
+
+article table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  white-space: normal;
+}
+
+article th {
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--lightgray) 55%, var(--light));
+}
+
+article th,
+article td {
+  min-width: 8rem;
+  vertical-align: top;
 }
 
 blockquote,
@@ -158,6 +230,18 @@ blockquote,
   border-radius: 0.85rem;
   background: color-mix(in srgb, var(--light) 88%, transparent);
   padding: 0.8rem;
+}
+
+.toc a,
+.toc button,
+.backlinks a {
+  color: var(--darkgray);
+}
+
+.toc a:hover,
+.toc a.in-view,
+.backlinks a:hover {
+  color: var(--secondary);
 }
 
 footer {
@@ -256,7 +340,7 @@ footer {
 
 .garden-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
   gap: 0.9rem;
   margin: 1.25rem 0 2.5rem;
 }
@@ -286,10 +370,13 @@ footer {
 }
 
 .garden-card-icon {
+  display: block;
+  min-height: 1.5rem;
   color: var(--secondary);
   font-family: var(--codeFont);
   font-size: 1.25rem;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .garden-card strong {

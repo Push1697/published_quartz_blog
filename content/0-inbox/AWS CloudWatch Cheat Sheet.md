@@ -15,31 +15,31 @@ garden: true
 
 ## 🧠 CloudWatch: What to Use & When (Exam View)
 
-| Requirement / Scenario | Use This CloudWatch Feature |
-| :--- | :--- |
-| **Monitor** CPU, memory, disk, latency | **Metrics** |
-| **Alert** when threshold is breached | **Alarms** |
-| **Collect logs** from EC2, Lambda, ECS | **Logs** |
-| **Real-time** log debugging | **Live Tail** |
-| **Query** logs with SQL-like syntax | **Log Insights** |
-| **Detect unusual** log behavior automatically | **Log Anomalies** |
-| **Trace** distributed microservices | **X-Ray Traces** |
-| **Visualize** service dependencies | **X-Ray Trace Map** |
-| **Event-driven** automation (scale, notify, remediate) | **Events (EventBridge)** |
-| **Identify top contributors** in high-cardinality data | **Contributor Insights** |
+| Requirement / Scenario                                 | Use This CloudWatch Feature |
+| :----------------------------------------------------- | :-------------------------- |
+| **Monitor** CPU, memory, disk, latency                 | **Metrics**                 |
+| **Alert** when threshold is breached                   | **Alarms**                  |
+| **Collect logs** from EC2, Lambda, ECS                 | **Logs**                    |
+| **Real-time** log debugging                            | **Live Tail**               |
+| **Query** logs with SQL-like syntax                    | **Log Insights**            |
+| **Detect unusual** log behavior automatically          | **Log Anomalies**           |
+| **Trace** distributed microservices                    | **X-Ray Traces**            |
+| **Visualize** service dependencies                     | **X-Ray Trace Map**         |
+| **Event-driven** automation (scale, notify, remediate) | **Events (EventBridge)**    |
+| **Identify top contributors** in high-cardinality data | **Contributor Insights**    |
 
 ## 🎯 High-Yield Exam Keywords (Memorize These)
 
-* **Metrics** → “Performance data”, “time-series”
-* **Alarms** → “Threshold”, “notify”, “trigger action”
-* **Logs** → “Centralized logging”
-* **Log Insights** → “Query”, “troubleshoot”
-* **Live Tail** → “Real-time”
-* **Log Anomalies** → “ML-based detection”
-* **X-Ray** → “Latency”, “distributed tracing”
-* **Trace Map** → “Service dependencies”
-* **Events** → “Event-driven automation”
-* **Contributor Insights** → “Top talkers”, “high cardinality”
+- **Metrics** → “Performance data”, “time-series”
+- **Alarms** → “Threshold”, “notify”, “trigger action”
+- **Logs** → “Centralized logging”
+- **Log Insights** → “Query”, “troubleshoot”
+- **Live Tail** → “Real-time”
+- **Log Anomalies** → “ML-based detection”
+- **X-Ray** → “Latency”, “distributed tracing”
+- **Trace Map** → “Service dependencies”
+- **Events** → “Event-driven automation”
+- **Contributor Insights** → “Top talkers”, “high cardinality”
 
 ## ❗ Common Exam Traps
 
@@ -119,32 +119,6 @@ flowchart TB
 
     Start --> |Top Talkers?| Analysis
 
-    %% Styling
-
-    classDef startStyle fill:#1E293B,stroke:#1E293B,color:#fff,stroke-width:3px
-
-    classDef metricsStyle fill:#DBEAFE,stroke:#1E40AF,color:#1E40AF,stroke-width:2px
-
-    classDef logsStyle fill:#EDE9FE,stroke:#6D28D9,color:#6D28D9,stroke-width:2px
-
-    classDef xrayStyle fill:#FED7AA,stroke:#EA580C,color:#EA580C,stroke-width:2px
-
-    classDef eventStyle fill:#D1FAE5,stroke:#059669,color:#059669,stroke-width:2px
-
-    classDef analysisStyle fill:#FEE2E2,stroke:#DC2626,color:#DC2626,stroke-width:2px
-
-    class Start startStyle
-
-    class M1,M2 metricsStyle
-
-    class L1,L2,L3,L4 logsStyle
-
-    class X1,X2 xrayStyle
-
-    class E1,E2 eventStyle
-
-    class A1 analysisStyle
-
 ```
 
 ---
@@ -164,15 +138,15 @@ I created a **One-Page Cheat Sheet** and a **Decision Diagram** to help you map 
 
 ## Quick Reference
 
-| Scenario | Service | Keywords |
-|----------|---------|----------|
-| Monitor CPU/RAM | **Metrics** | Performance, Dimension, Period |
-| Alert on threshold | **Alarms** | Threshold, SNS, State |
-| Debug errors | **Logs** | Centralized, Error, Exception |
-| Query logs | **Log Insights** | SQL-like, Ad-hoc |
-| Trace microservices | **X-Ray** | Latency, Bottleneck, Service Map |
-| Find bad actors | **Contributor Insights** | Top Talkers, High Cardinality |
-| Automate responses | **EventBridge** | Rules, Lambda, Events |
+| Scenario            | Service                  | Keywords                         |
+| ------------------- | ------------------------ | -------------------------------- |
+| Monitor CPU/RAM     | **Metrics**              | Performance, Dimension, Period   |
+| Alert on threshold  | **Alarms**               | Threshold, SNS, State            |
+| Debug errors        | **Logs**                 | Centralized, Error, Exception    |
+| Query logs          | **Log Insights**         | SQL-like, Ad-hoc                 |
+| Trace microservices | **X-Ray**                | Latency, Bottleneck, Service Map |
+| Find bad actors     | **Contributor Insights** | Top Talkers, High Cardinality    |
+| Automate responses  | **EventBridge**          | Rules, Lambda, Events            |
 
 ---
 
