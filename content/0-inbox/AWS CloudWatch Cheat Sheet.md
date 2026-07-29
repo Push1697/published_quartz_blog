@@ -1,9 +1,10 @@
 ---
-title: AWS CloudWatch Cheat Sheet & Decision Diagram
+title: AWS CloudWatch Exam Cheat Sheet & Decision Diagram
 created: 2025-12-17
 tags:
   - AWS
   - CloudWatch
+  - Exam
   - Certification
   - Cheatsheet
 publish: true
@@ -148,6 +149,19 @@ flowchart TB
 
 ---
 
+## 📋 Ready-to-post LinkedIn Caption
+
+🚀 **Master AWS CloudWatch for your Cert Exam!**
+
+CloudWatch is a beast 🦖, but you only need to know a few key mappings to pass.
+
+I created a **One-Page Cheat Sheet** and a **Decision Diagram** to help you map scenarios to features instantly.
+
+**💡 Quick Wins:**
+✅ Need "Real-time" debugging? → **Live Tail**
+✅ Need "Distributed Tracing"? → **X-Ray**
+✅ Need "Top Talkers"? → **Contributor Insights**
+
 ## Quick Reference
 
 | Scenario | Service | Keywords |
@@ -162,4 +176,8 @@ flowchart TB
 
 ---
 
-That's the whole decision process condensed to one table, one keyword list, and one diagram — bookmark this page instead of re-deriving the mapping every time you hit a CloudWatch question.
+Swipe through to see the Decision Tree! 👉
+
+[AWS cloudwatch file]("file:///C:/Users/Pushpendra/Documents/obsidian/blogs_html/aws_cloudwatch.html")
+
+#AWS #CloudComputing #AWSCertification #SolutionsArchitect #DevOps #CloudWatch #Cheatsheet

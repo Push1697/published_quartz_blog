@@ -1,3 +1,343 @@
 @use "./base.scss";
 
-// put your custom CSS here!
+:root {
+  --brand-cyan: #22d3ee;
+  --brand-purple: #a855f7;
+  --brand-pink: #ec4899;
+  --brand-gradient: linear-gradient(
+    110deg,
+    var(--brand-cyan),
+    var(--brand-purple) 55%,
+    var(--brand-pink)
+  );
+  --surface-glow: rgba(34, 211, 238, 0.09);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% 2%, rgba(34, 211, 238, 0.09), transparent 24rem),
+    radial-gradient(circle at 92% 8%, rgba(168, 85, 247, 0.1), transparent 28rem), var(--light);
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.3);
+}
+
+.page-title {
+  font-size: 1.1rem;
+  letter-spacing: -0.025em;
+}
+
+.page-title a {
+  background: var(--brand-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 800;
+}
+
+.page-title a::before {
+  content: ">_ ";
+  color: var(--secondary);
+  -webkit-text-fill-color: var(--secondary);
+  font-family: var(--codeFont);
+  font-size: 0.9em;
+}
+
+.sidebar {
+  background: color-mix(in srgb, var(--light) 83%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.left.sidebar {
+  border-right: 1px solid color-mix(in srgb, var(--lightgray) 70%, transparent);
+}
+
+.right.sidebar {
+  border-left: 1px solid color-mix(in srgb, var(--lightgray) 70%, transparent);
+}
+
+.center {
+  max-width: 48rem;
+}
+
+article {
+  line-height: 1.78;
+}
+
+article h1,
+article h2,
+article h3 {
+  letter-spacing: -0.025em;
+}
+
+.article-title {
+  background: var(--brand-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+a {
+  text-underline-offset: 0.2em;
+}
+
+article a {
+  text-decoration-color: color-mix(in srgb, var(--secondary) 55%, transparent);
+  text-decoration-thickness: 0.08em;
+}
+
+article a:hover {
+  color: var(--tertiary);
+}
+
+code {
+  border: 1px solid color-mix(in srgb, var(--secondary) 20%, var(--lightgray));
+  border-radius: 0.35rem;
+}
+
+pre {
+  border: 1px solid color-mix(in srgb, var(--secondary) 25%, var(--lightgray));
+  border-radius: 0.8rem;
+  box-shadow: 0 18px 45px rgba(2, 6, 23, 0.12);
+}
+
+blockquote,
+.callout {
+  border-radius: 0.8rem;
+  border-color: color-mix(in srgb, var(--secondary) 45%, var(--lightgray));
+  background: color-mix(in srgb, var(--highlight) 65%, var(--light));
+}
+
+.search-button,
+.darkmode,
+.readermode {
+  border: 1px solid var(--lightgray);
+  border-radius: 0.65rem;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.search-button:hover,
+.darkmode:hover,
+.readermode:hover {
+  border-color: var(--secondary);
+  background: var(--highlight);
+  transform: translateY(-1px);
+}
+
+.explorer .folder-title,
+.explorer a {
+  border-radius: 0.4rem;
+}
+
+.explorer a:hover,
+.explorer .folder-title:hover {
+  color: var(--secondary);
+}
+
+.tag-link {
+  border: 1px solid color-mix(in srgb, var(--secondary) 35%, var(--lightgray));
+  border-radius: 999px;
+  background: var(--highlight);
+  padding: 0.16rem 0.55rem;
+}
+
+.graph,
+.backlinks,
+.toc {
+  border: 1px solid color-mix(in srgb, var(--lightgray) 80%, transparent);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--light) 88%, transparent);
+  padding: 0.8rem;
+}
+
+footer {
+  border-top: 1px solid var(--lightgray);
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+}
+
+.garden-hero {
+  position: relative;
+  overflow: hidden;
+  margin: 0.5rem 0 3rem;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid color-mix(in srgb, var(--secondary) 32%, var(--lightgray));
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 92% 10%, rgba(168, 85, 247, 0.18), transparent 15rem),
+    radial-gradient(circle at 8% 100%, rgba(34, 211, 238, 0.14), transparent 18rem),
+    color-mix(in srgb, var(--light) 88%, transparent);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.14);
+}
+
+.garden-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.garden-eyebrow {
+  margin: 0 0 0.8rem;
+  color: var(--secondary);
+  font-family: var(--codeFont);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.garden-lede {
+  max-width: 18ch;
+  margin: 0;
+  color: var(--dark);
+  font-family: var(--headerFont);
+  font-size: clamp(1.7rem, 5vw, 2.7rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+}
+
+.garden-copy {
+  max-width: 58ch;
+  margin: 1rem 0 0;
+  color: var(--darkgray);
+  font-size: 1rem;
+}
+
+.garden-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.garden-actions a {
+  border-radius: 0.65rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.garden-actions a:hover {
+  transform: translateY(-2px);
+}
+
+.garden-primary {
+  background: var(--brand-gradient);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(34, 211, 238, 0.18);
+}
+
+.garden-secondary {
+  border: 1px solid var(--lightgray);
+  background: color-mix(in srgb, var(--light) 86%, transparent);
+  color: var(--dark);
+}
+
+.garden-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 1.25rem 0 2.5rem;
+}
+
+.garden-card {
+  display: flex;
+  min-height: 12rem;
+  flex-direction: column;
+  gap: 0.7rem;
+  border: 1px solid var(--lightgray);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--light) 92%, transparent);
+  padding: 1.1rem;
+  color: var(--dark);
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.garden-card:hover {
+  border-color: var(--secondary);
+  color: var(--dark);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 35px rgba(2, 6, 23, 0.12);
+}
+
+.garden-card-icon {
+  color: var(--secondary);
+  font-family: var(--codeFont);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.garden-card strong {
+  font-size: 1rem;
+}
+
+.garden-card > span:not(.garden-card-icon) {
+  color: var(--darkgray);
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.garden-card small {
+  margin-top: auto;
+  color: var(--secondary);
+  font-family: var(--codeFont);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 800px) {
+  .sidebar {
+    backdrop-filter: none;
+  }
+
+  .left.sidebar,
+  .right.sidebar {
+    border: 0;
+  }
+
+  .article-title {
+    font-size: clamp(2rem, 10vw, 3rem);
+  }
+
+  .garden-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .garden-card {
+    min-height: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
