@@ -1,16 +1,15 @@
 @use "./base.scss";
 
 :root {
-  --brand-cyan: #22d3ee;
-  --brand-purple: #a855f7;
-  --brand-pink: #ec4899;
   --brand-gradient: linear-gradient(
-    110deg,
-    var(--brand-cyan),
-    var(--brand-purple) 55%,
-    var(--brand-pink)
+    100deg,
+    var(--secondary),
+    var(--tertiary) 55%,
+    color-mix(in srgb, var(--tertiary) 40%, var(--secondary)) 100%
   );
-  --surface-glow: rgba(34, 211, 238, 0.09);
+  --glass-surface: color-mix(in srgb, var(--light) 78%, transparent);
+  --glass-border: color-mix(in srgb, var(--secondary) 22%, var(--lightgray));
+  --glass-blur: blur(18px);
 }
 
 html {
@@ -21,12 +20,22 @@ body {
   font-size: 17px;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 8% 2%, rgba(34, 211, 238, 0.09), transparent 24rem),
-    radial-gradient(circle at 92% 8%, rgba(168, 85, 247, 0.1), transparent 28rem), var(--light);
+    radial-gradient(
+      circle at 8% 2%,
+      color-mix(in srgb, var(--secondary) 9%, transparent),
+      transparent 24rem
+    ),
+    radial-gradient(
+      circle at 92% 8%,
+      color-mix(in srgb, var(--tertiary) 10%, transparent),
+      transparent 28rem
+    ),
+    var(--light);
+  background-attachment: fixed;
 }
 
 ::selection {
-  background: rgba(34, 211, 238, 0.3);
+  background: color-mix(in srgb, var(--secondary) 30%, transparent);
 }
 
 .page-title {
@@ -51,8 +60,9 @@ body {
 }
 
 .sidebar {
-  background: color-mix(in srgb, var(--light) 83%, transparent);
-  backdrop-filter: blur(18px);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .left.sidebar {
@@ -64,7 +74,7 @@ body {
 }
 
 .center {
-  max-width: 52rem;
+  max-width: 54rem;
 }
 
 article {
@@ -171,7 +181,11 @@ pre:has(> code.mermaid) {
       color-mix(in srgb, var(--light) 96%, transparent),
       color-mix(in srgb, var(--light) 96%, transparent)
     ),
-    radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.12), transparent 22rem);
+    radial-gradient(
+      circle at 20% 20%,
+      color-mix(in srgb, var(--secondary) 12%, transparent),
+      transparent 22rem
+    );
   padding: 1rem;
 }
 
@@ -271,9 +285,11 @@ blockquote,
 .graph,
 .backlinks,
 .toc {
-  border: 1px solid color-mix(in srgb, var(--lightgray) 80%, transparent);
+  border: 1px solid var(--glass-border);
   border-radius: 0.85rem;
-  background: color-mix(in srgb, var(--light) 88%, transparent);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   padding: 0.8rem;
 }
 
@@ -308,15 +324,47 @@ footer {
 .garden-hero {
   position: relative;
   overflow: hidden;
-  margin: 0.5rem 0 3rem;
-  padding: clamp(1.5rem, 5vw, 3rem);
-  border: 1px solid color-mix(in srgb, var(--secondary) 32%, var(--lightgray));
-  border-radius: 1.25rem;
+  margin: 1rem 0 4.5rem;
+  padding: clamp(2rem, 6vw, 3.75rem);
+  border: 1px solid transparent;
+  border-radius: 1.5rem;
   background:
-    radial-gradient(circle at 92% 10%, rgba(168, 85, 247, 0.18), transparent 15rem),
-    radial-gradient(circle at 8% 100%, rgba(34, 211, 238, 0.14), transparent 18rem),
-    color-mix(in srgb, var(--light) 88%, transparent);
+    radial-gradient(
+      circle at 92% 10%,
+      color-mix(in srgb, var(--tertiary) 18%, transparent),
+      transparent 15rem
+    ),
+    radial-gradient(
+      circle at 8% 100%,
+      color-mix(in srgb, var(--secondary) 14%, transparent),
+      transparent 18rem
+    ),
+    var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   box-shadow: 0 24px 70px rgba(2, 6, 23, 0.14);
+}
+
+.garden-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(
+    from 180deg,
+    color-mix(in srgb, var(--secondary) 55%, transparent),
+    color-mix(in srgb, var(--tertiary) 45%, transparent) 35%,
+    transparent 60%,
+    color-mix(in srgb, var(--secondary) 55%, transparent) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.6;
 }
 
 .garden-hero::after {
@@ -384,20 +432,22 @@ footer {
 .garden-primary {
   background: var(--brand-gradient);
   color: #fff;
-  box-shadow: 0 10px 24px rgba(34, 211, 238, 0.18);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--secondary) 30%, transparent);
 }
 
 .garden-secondary {
-  border: 1px solid var(--lightgray);
-  background: color-mix(in srgb, var(--light) 86%, transparent);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: var(--dark);
 }
 
 .garden-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-  gap: 0.9rem;
-  margin: 1.25rem 0 2.5rem;
+  gap: 1.1rem;
+  margin: 1.75rem 0 4rem;
 }
 
 .garden-card {
@@ -405,9 +455,11 @@ footer {
   min-height: 12rem;
   flex-direction: column;
   gap: 0.7rem;
-  border: 1px solid var(--lightgray);
+  border: 1px solid var(--glass-border);
   border-radius: 0.9rem;
-  background: color-mix(in srgb, var(--light) 92%, transparent);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   padding: 1.1rem;
   color: var(--dark);
   text-decoration: none;
@@ -454,13 +506,19 @@ footer {
 
 .garden-about {
   scroll-margin-top: 2rem;
-  margin: 3rem 0 2.5rem;
-  border: 1px solid color-mix(in srgb, var(--tertiary) 30%, var(--lightgray));
-  border-radius: 1rem;
+  margin: 4rem 0 3.5rem;
+  border: 1px solid color-mix(in srgb, var(--tertiary) 30%, var(--glass-border));
+  border-radius: 1.25rem;
   background:
-    radial-gradient(circle at 100% 0, rgba(168, 85, 247, 0.14), transparent 18rem),
-    color-mix(in srgb, var(--light) 92%, transparent);
-  padding: clamp(1.35rem, 4vw, 2.2rem);
+    radial-gradient(
+      circle at 100% 0,
+      color-mix(in srgb, var(--tertiary) 14%, transparent),
+      transparent 18rem
+    ),
+    var(--glass-surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  padding: clamp(1.75rem, 5vw, 2.75rem);
 }
 
 .garden-about h2 {
@@ -546,12 +604,34 @@ footer {
     line-height: 1.75;
   }
 
+  .garden-hero {
+    margin-bottom: 3rem;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .garden-about {
+    margin: 3rem 0 2.5rem;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
   .garden-grid {
     grid-template-columns: 1fr;
+    margin-bottom: 3rem;
   }
 
   .garden-card {
     min-height: auto;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .graph,
+  .backlinks,
+  .toc {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }
 
