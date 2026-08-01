@@ -130,4 +130,11 @@ document.addEventListener("nav", () => {
       link.removeEventListener("mouseleave", clearActivePopover)
     })
   }
+
+  // popovers are positioned once (relative to the viewport) at hover time and
+  // never re-measured, so scrolling the page leaves them floating over
+  // unrelated content — close them as soon as the page moves.
+  const scrollHandler = () => clearActivePopover()
+  document.addEventListener("scroll", scrollHandler, { passive: true, capture: true })
+  window.addCleanup(() => document.removeEventListener("scroll", scrollHandler, { capture: true }))
 })

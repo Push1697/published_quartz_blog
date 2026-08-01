@@ -29,6 +29,18 @@ const items: NavItem[] = [
     active: (slug) => slug === "tags" || slug.startsWith("tags/"),
   },
   {
+    label: "Papershelf",
+    icon: "▤",
+    href: "/papershelf/",
+    active: (slug) => slug === "papershelf",
+  },
+  {
+    label: "Bookshelf",
+    icon: "▥",
+    href: "/bookshelf/",
+    active: (slug) => slug === "bookshelf",
+  },
+  {
     label: "About",
     icon: "◎",
     href: "/#about",

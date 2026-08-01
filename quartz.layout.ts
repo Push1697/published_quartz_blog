@@ -5,7 +5,7 @@ import * as Component from "./quartz/components"
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
   header: [],
-  afterBody: [],
+  afterBody: [Component.ShelfPreview()],
   footer: Component.Footer({
     links: {
       Portfolio: "https://pushpendra.overflowbyte.cloud",
