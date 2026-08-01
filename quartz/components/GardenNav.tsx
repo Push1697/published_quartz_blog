@@ -31,13 +31,13 @@ const items: NavItem[] = [
   {
     label: "Papershelf",
     icon: "▤",
-    href: "/papershelf/",
+    href: "/papershelf",
     active: (slug) => slug === "papershelf",
   },
   {
     label: "Bookshelf",
     icon: "▥",
-    href: "/bookshelf/",
+    href: "/bookshelf",
     active: (slug) => slug === "bookshelf",
   },
   {
