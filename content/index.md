@@ -14,7 +14,10 @@ description: Field notes on cloud infrastructure, DevOps, Linux, automation, and
   </div>
 </div>
 
-## Start exploring
+<section class="garden-explore">
+
+<h2 class="garden-section-title">Start exploring</h2>
+<p class="garden-section-subtitle">Navigate the garden through focused technology and practice areas.</p>
 
 <div class="garden-grid">
   <a class="garden-card" href="/0-inbox/AWS-CloudWatch-Cheat-Sheet">
@@ -62,10 +65,12 @@ description: Field notes on cloud infrastructure, DevOps, Linux, automation, and
   <a class="garden-card" href="/tags/">
     <span class="garden-card-icon">#</span>
     <strong>Browse by topic</strong>
-    <span>Navigate the garden through focused technology and practice areas.</span>
+    <span>Jump straight to a tag to see every note filed under it.</span>
     <small>INDEX · TAGS</small>
   </a>
 </div>
+
+</section>
 
 <section id="about" class="garden-about">
   <p class="garden-eyebrow">ABOUT THIS GARDEN</p>
