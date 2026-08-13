@@ -47,6 +47,12 @@ description: Field notes on cloud infrastructure, DevOps, Linux, automation, and
     <span>VMs, hypervisors, containers, and cloud concepts explained with simple analogies.</span>
     <small>FOUNDATIONS · HINDI</small>
   </a>
+  <a class="garden-card" href="/3-Resources/WHM-cPanel/cPanel-and-WHM-Log-File-Locations">
+    <span class="garden-card-icon">☰</span>
+    <strong>cPanel & WHM logs</strong>
+    <span>Quick reference for the log file locations you need when troubleshooting cPanel and WHM.</span>
+    <small>SYSADMIN · CPANEL</small>
+  </a>
   <a class="garden-card" href="/tags/">
     <span class="garden-card-icon">#</span>
     <strong>Browse by topic</strong>
