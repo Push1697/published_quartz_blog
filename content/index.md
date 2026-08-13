@@ -53,6 +53,12 @@ description: Field notes on cloud infrastructure, DevOps, Linux, automation, and
     <span>Quick reference for the log file locations you need when troubleshooting cPanel and WHM.</span>
     <small>SYSADMIN · CPANEL</small>
   </a>
+  <a class="garden-card" href="/3-Resources/MySQL/MySQL-Administration-Guide">
+    <span class="garden-card-icon">⛁</span>
+    <strong>MySQL administration</strong>
+    <span>Install, administer, and troubleshoot MySQL - setup, everyday commands, users, and backups.</span>
+    <small>DATABASE · MYSQL</small>
+  </a>
   <a class="garden-card" href="/tags/">
     <span class="garden-card-icon">#</span>
     <strong>Browse by topic</strong>
