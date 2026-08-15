@@ -4,7 +4,16 @@ import * as Component from "./quartz/components"
 // components shared across all pages
 export const sharedPageComponents: SharedLayout = {
   head: Component.Head(),
-  header: [],
+  header: [
+    Component.Flex({
+      components: [
+        { Component: Component.PageTitle(), grow: true },
+        { Component: Component.Search({ enablePreview: false }), grow: true, basis: "16rem" },
+        { Component: Component.Darkmode() },
+      ],
+      gap: "1rem",
+    }),
+  ],
   afterBody: [Component.ShelfPreview()],
   footer: Component.Footer({
     links: {
@@ -28,38 +37,21 @@ export const defaultContentPageLayout: PageLayout = {
     Component.TagList(),
   ],
   left: [
-    Component.PageTitle(),
-    Component.MobileOnly(Component.Spacer()),
-    Component.Flex({
-      components: [
-        {
-          Component: Component.Search(),
-          grow: true,
-        },
-        { Component: Component.Darkmode() },
-        { Component: Component.ReaderMode() },
-      ],
-    }),
     Component.GardenNav(),
   ],
-  right: [Component.DesktopOnly(Component.TableOfContents()), Component.Backlinks()],
+  right: [
+    Component.Graph({
+      localGraph: { depth: 1, scale: 1, repelForce: 0.5, linkDistance: 30 },
+    }),
+    Component.DesktopOnly(Component.TableOfContents()),
+    Component.Backlinks(),
+  ],
 }
 
 // components for pages that display lists of pages  (e.g. tags or folders)
 export const defaultListPageLayout: PageLayout = {
   beforeBody: [Component.Breadcrumbs(), Component.ArticleTitle(), Component.ContentMeta()],
   left: [
-    Component.PageTitle(),
-    Component.MobileOnly(Component.Spacer()),
-    Component.Flex({
-      components: [
-        {
-          Component: Component.Search(),
-          grow: true,
-        },
-        { Component: Component.Darkmode() },
-      ],
-    }),
     Component.GardenNav(),
   ],
   right: [],
