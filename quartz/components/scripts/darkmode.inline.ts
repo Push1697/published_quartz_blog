@@ -1,4 +1,5 @@
-const currentTheme = localStorage.getItem("theme") ?? "dark"
+const themeStorageKey = "overflowbyte-wiki-theme"
+const currentTheme = localStorage.getItem(themeStorageKey) ?? "dark"
 document.documentElement.setAttribute("saved-theme", currentTheme)
 
 const emitThemeChangeEvent = (theme: "light" | "dark") => {
@@ -13,14 +14,14 @@ document.addEventListener("nav", () => {
     const newTheme =
       document.documentElement.getAttribute("saved-theme") === "dark" ? "light" : "dark"
     document.documentElement.setAttribute("saved-theme", newTheme)
-    localStorage.setItem("theme", newTheme)
+    localStorage.setItem(themeStorageKey, newTheme)
     emitThemeChangeEvent(newTheme)
   }
 
   const themeChange = (e: MediaQueryListEvent) => {
     const newTheme = e.matches ? "dark" : "light"
     document.documentElement.setAttribute("saved-theme", newTheme)
-    localStorage.setItem("theme", newTheme)
+    localStorage.setItem(themeStorageKey, newTheme)
     emitThemeChangeEvent(newTheme)
   }
 
