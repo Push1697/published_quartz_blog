@@ -1,4 +1,5 @@
 ---
+section: Troubleshooting
 title: "When Two Nodes Share One IP: Fixing Flannel and CoreDNS on Talos Kubernetes"
 created: 2025-11-28 14:40
 tags:

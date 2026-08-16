@@ -1,4 +1,5 @@
 ---
+section: Troubleshooting
 created: 2026-01-27
 tags:
   - linux

@@ -1,0 +1,191 @@
+.knowledge-nav {
+  width: 100%;
+}
+
+.knowledge-primary,
+.knowledge-groups ul,
+.related-notes ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.knowledge-primary {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.knowledge-primary a {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  color: var(--dark);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.knowledge-primary a:hover,
+.knowledge-primary a.active {
+  background: var(--highlight);
+  color: var(--secondary);
+}
+
+.knowledge-nav-label {
+  margin: 1.5rem 0 0.6rem;
+  color: var(--gray);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.knowledge-groups details {
+  margin: 0.15rem 0;
+}
+
+.knowledge-groups summary {
+  cursor: pointer;
+  border-radius: 0.35rem;
+  padding: 0.45rem 0.55rem;
+  color: var(--dark);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.knowledge-groups summary:hover {
+  background: var(--highlight);
+  color: var(--secondary);
+}
+
+.knowledge-groups ul {
+  margin: 0.1rem 0 0.55rem 0.75rem;
+  border-left: 1px solid var(--lightgray);
+}
+
+.knowledge-groups li a {
+  display: block;
+  padding: 0.3rem 0.65rem;
+  color: var(--darkgray);
+  font-size: 0.79rem;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.knowledge-groups li a:hover {
+  color: var(--secondary);
+}
+
+.published-notes {
+  max-width: 52rem;
+  margin: 3.5rem auto 0;
+  border-top: 1px solid var(--lightgray);
+  padding-top: 2.25rem;
+}
+
+.knowledge-section-heading p,
+.knowledge-section-heading span {
+  color: var(--gray);
+  font-size: 0.78rem;
+}
+
+.knowledge-section-heading p {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.knowledge-section-heading h2 {
+  margin: 0.25rem 0;
+  font-size: 1.9rem;
+}
+
+.published-section {
+  margin-top: 2.25rem;
+  scroll-margin-top: 2rem;
+}
+
+.published-section > h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.published-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.published-note {
+  display: flex;
+  min-height: 6.75rem;
+  flex-direction: column;
+  gap: 0.35rem;
+  border: 1px solid var(--lightgray);
+  border-radius: 0.45rem;
+  padding: 0.8rem 0.9rem;
+  color: var(--dark);
+  text-decoration: none;
+}
+
+.published-note:hover {
+  border-color: var(--secondary);
+  background: var(--highlight);
+  color: var(--dark);
+}
+
+.published-note-meta,
+.published-note-tags {
+  color: var(--gray);
+  font-size: 0.72rem;
+}
+
+.published-note strong {
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.published-note-tags {
+  margin-top: auto;
+}
+
+.related-notes,
+.recent-notes {
+  border-top: 1px solid var(--lightgray);
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+}
+
+.related-notes h3,
+.recent-notes > h3 {
+  margin: 0 0 0.6rem;
+  color: var(--gray);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.related-notes li {
+  margin: 0.45rem 0;
+}
+
+.related-notes a {
+  color: var(--darkgray);
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.related-notes a:hover {
+  color: var(--secondary);
+}
+
+@media (max-width: 800px) {
+  .published-grid {
+    grid-template-columns: 1fr;
+  }
+}

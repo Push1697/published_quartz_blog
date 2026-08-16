@@ -1,4 +1,5 @@
 ---
+section: Reference
 title: AWS CloudWatch Exam Cheat Sheet & Decision Diagram
 created: 2025-12-17
 tags:

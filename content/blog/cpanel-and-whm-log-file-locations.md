@@ -1,4 +1,5 @@
 ---
+section: Reference
 title: cPanel and WHM Log File Locations
 created: 2026-08-13
 tags:

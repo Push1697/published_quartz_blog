@@ -1,4 +1,5 @@
 ---
+section: Foundations
 title: Virtualization Samjhein — College Students ke Liye Hindi Guide
 created: 2025-03-26 09:25
 tags:

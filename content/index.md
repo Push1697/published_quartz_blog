@@ -1,13 +1,11 @@
 ---
-title: OverflowByte Learning Garden
+title: "🏠 Welcome!"
 publish: true
 garden: true
 description: Practical notes on cloud infrastructure, Linux, DevOps, automation, and production systems.
 ---
 
 <div class="garden-home">
-
-# Welcome to my Wiki
 
 <p class="lede">A practical knowledge base for cloud infrastructure, Linux, DevOps, automation, and the production systems behind reliable software. Notes are written from hands-on work, then refined as the understanding improves.</p>
 

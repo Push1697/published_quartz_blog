@@ -14,7 +14,7 @@ export const sharedPageComponents: SharedLayout = {
       gap: "1rem",
     }),
   ],
-  afterBody: [Component.ShelfPreview()],
+  afterBody: [Component.PublishedNotes()],
   footer: Component.Footer({
     links: {
       Portfolio: "https://pushpendra.overflowbyte.cloud",
@@ -37,12 +37,19 @@ export const defaultContentPageLayout: PageLayout = {
     Component.TagList(),
   ],
   left: [
-    Component.GardenNav(),
+    Component.KnowledgeNav(),
   ],
   right: [
     Component.Graph({
       localGraph: { depth: 1, scale: 1, repelForce: 0.5, linkDistance: 30 },
     }),
+    Component.RecentNotes({
+      title: "Latest articles",
+      limit: 6,
+      showTags: false,
+      filter: (file) => file.slug?.startsWith("blog/") ?? false,
+    }),
+    Component.RelatedNotes(),
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
   ],
@@ -52,7 +59,7 @@ export const defaultContentPageLayout: PageLayout = {
 export const defaultListPageLayout: PageLayout = {
   beforeBody: [Component.Breadcrumbs(), Component.ArticleTitle(), Component.ContentMeta()],
   left: [
-    Component.GardenNav(),
+    Component.KnowledgeNav(),
   ],
   right: [],
 }

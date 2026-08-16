@@ -25,6 +25,9 @@ import Flex from "./Flex"
 import ConditionalRender from "./ConditionalRender"
 import GardenNav from "./GardenNav"
 import ShelfPreview from "./ShelfPreview"
+import KnowledgeNav from "./KnowledgeNav"
+import PublishedNotes from "./PublishedNotes"
+import RelatedNotes from "./RelatedNotes"
 
 export {
   ArticleTitle,
@@ -54,4 +57,7 @@ export {
   ConditionalRender,
   GardenNav,
   ShelfPreview,
+  KnowledgeNav,
+  PublishedNotes,
+  RelatedNotes,
 }

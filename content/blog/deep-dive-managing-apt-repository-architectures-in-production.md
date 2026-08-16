@@ -1,4 +1,5 @@
 ---
+section: Guides
 title: Managing APT Repository Architectures in Production
 created: 2026-01-29
 tags:

@@ -52,6 +52,8 @@ The push triggers `.github/workflows/deploy.yml` on branch `v4`.
 - `.obsidian`, `.git`, `.trash`, and every unselected note remain outside Quartz.
 - `content/index.md` is a curated homepage and is always preserved.
 - Content is staged in a temporary directory before `rsync` updates Quartz.
+- Public copies are generated under `/blog/<note-title>`; vault folders such as `0-inbox` and `3-Resources` never appear in public URLs.
+- Notes are grouped as Troubleshooting, Runbooks, Guides, Reference, or Foundations. Add `section: <name>` to a note's frontmatter to override the automatic grouping.
 - A successful local build is required before `--push` commits anything.
 - The publisher stages only `content/`; unrelated Quartz changes are not committed.
 

@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+VAULT_ROOT="${GARDEN_VAULT:-/home/overflowbyte/Documents/obsidian/zettelkasten}"
+QUARTZ_ROOT="${GARDEN_QUARTZ:-/home/overflowbyte/Documents/obsidian/quartz_blog}"
+CONTENT_ROOT="$QUARTZ_ROOT/content"
+HOMEPAGE="$CONTENT_ROOT/index.md"
+LOCK_FILE="/tmp/pushpendra-garden-publish.lock"
+
+DRY_RUN=false
+SYNC_ONLY=false
+PUSH=false
+COMMIT_MESSAGE="Publish digital garden updates"
+
+usage() {
+  cat <<'EOF'
+Usage: publish-garden [options]
+
+Publish explicitly public Obsidian notes into Quartz's clean /blog URL space.
+
+Options:
+  --dry-run          Show the generated public URLs without changing content
+  --sync-only        Sync without running a Quartz build
+  --push             Commit synced content and push branch v4
+  -m, --message MSG  Commit message used with --push
+  -h, --help         Show this help
+
+A note is included only when its YAML frontmatter contains both:
+  publish: true
+  garden: true
+
+Source folders are never exposed in public URLs. Every selected note is copied
+to /blog/<note-title> and is grouped for the homepage and sidebar.
+EOF
+}
+
+while (($#)); do
+  case "$1" in
+    --dry-run) DRY_RUN=true ;;
+    --sync-only) SYNC_ONLY=true ;;
+    --push) PUSH=true ;;
+    -m|--message)
+      shift
+      [[ $# -gt 0 ]] || { echo "Error: --message requires a value" >&2; exit 2; }
+      COMMIT_MESSAGE="$1"
+      ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Error: unknown option: $1" >&2; usage >&2; exit 2 ;;
+  esac
+  shift
+done
+
+[[ -d "$VAULT_ROOT" ]] || { echo "Error: vault not found: $VAULT_ROOT" >&2; exit 1; }
+[[ -d "$QUARTZ_ROOT/.git" ]] || { echo "Error: Quartz repository not found: $QUARTZ_ROOT" >&2; exit 1; }
+[[ -f "$HOMEPAGE" ]] || { echo "Error: curated homepage missing: $HOMEPAGE" >&2; exit 1; }
+
+exec 9>"$LOCK_FILE"
+flock -n 9 || { echo "Error: another garden publish is already running" >&2; exit 1; }
+
+STAGING_ROOT="$(mktemp -d /tmp/pushpendra-garden.XXXXXX)"
+cleanup() {
+  [[ "$STAGING_ROOT" == /tmp/pushpendra-garden.* ]] && rm -rf -- "$STAGING_ROOT"
+}
+trap cleanup EXIT
+
+mkdir -p "$STAGING_ROOT/content/blog"
+cp -p -- "$HOMEPAGE" "$STAGING_ROOT/content/index.md"
+
+has_public_frontmatter() {
+  awk '
+    NR == 1 && $0 == "---" { in_frontmatter = 1; next }
+    in_frontmatter && $0 == "---" { exit }
+    in_frontmatter && $0 ~ /^[[:space:]]*publish:[[:space:]]*true[[:space:]]*$/ { publish = 1 }
+    in_frontmatter && $0 ~ /^[[:space:]]*garden:[[:space:]]*true[[:space:]]*$/ { garden = 1 }
+    END { exit !(publish && garden) }
+  ' "$1"
+}
+
+frontmatter_section() {
+  awk '
+    NR == 1 && $0 == "---" { in_frontmatter = 1; next }
+    in_frontmatter && $0 == "---" { exit }
+    in_frontmatter && $0 ~ /^[[:space:]]*section:[[:space:]]*/ {
+      sub(/^[[:space:]]*section:[[:space:]]*/, ""); gsub(/^"|"$/, ""); print; exit
+    }
+  ' "$1"
+}
+
+infer_section() {
+  local text
+  text="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+  case "$text" in
+    *runbook*|*start*stop*|*maintenance*) printf 'Runbooks' ;;
+    *fix*|*troubleshoot*|*error*|*issue*|*debug*|*failure*) printf 'Troubleshooting' ;;
+    *cheat*|*log*|*reference*) printf 'Reference' ;;
+    *introduction*|*fundamental*|*course*|*college*student*|*virtualization*) printf 'Foundations' ;;
+    *) printf 'Guides' ;;
+  esac
+}
+
+slugify() {
+  printf '%s' "$1" | sed -E 's/\.md$//' | tr '[:upper:]' '[:lower:]' | sed -E 's/[^[:alnum:]]+/-/g; s/^-+//; s/-+$//'
+}
+
+write_public_copy() {
+  awk -v section="$3" '
+    NR == 1 && $0 == "---" { in_frontmatter = 1; print; print "section: " section; next }
+    in_frontmatter && $0 == "---" { in_frontmatter = 0; print; next }
+    in_frontmatter && $0 ~ /^[[:space:]]*section:[[:space:]]*/ { next }
+    { print }
+  ' "$1" > "$2"
+}
+
+declare -A seen_slugs
+published_count=0
+while IFS= read -r -d '' note; do
+  if has_public_frontmatter "$note"; then
+    relative_path="${note#"$VAULT_ROOT"/}"
+    slug="$(slugify "${relative_path##*/}")"
+    [[ -n "$slug" ]] || slug="note"
+    if [[ -n "${seen_slugs[$slug]:-}" ]]; then
+      slug="$slug-$(printf '%s' "$relative_path" | sha256sum | cut -c1-8)"
+    fi
+    seen_slugs["$slug"]=1
+    section="$(frontmatter_section "$note")"
+    [[ -n "$section" ]] || section="$(infer_section "$relative_path")"
+    destination="$STAGING_ROOT/content/blog/$slug.md"
+    write_public_copy "$note" "$destination" "$section"
+    printf '  include  blog/%s.md  ←  %s [%s]\n' "$slug" "$relative_path" "$section"
+    ((published_count += 1))
+  fi
+done < <(find "$VAULT_ROOT" \
+  -type d \( -name .git -o -name .obsidian -o -name .trash \) -prune -o \
+  -type f -name '*.md' -print0)
+
+echo "Selected $published_count public note(s), plus the curated homepage."
+
+rsync_args=(-a --delete --itemize-changes)
+if "$DRY_RUN"; then
+  rsync_args+=(--dry-run)
+fi
+rsync "${rsync_args[@]}" "$STAGING_ROOT/content/" "$CONTENT_ROOT/"
+
+if "$DRY_RUN"; then
+  echo "Dry run complete; no files were changed."
+  exit 0
+fi
+
+if ! "$SYNC_ONLY"; then
+  echo "Building Quartz..."
+  npm --prefix "$QUARTZ_ROOT" run quartz -- build
+fi
+
+if "$PUSH"; then
+  git -C "$QUARTZ_ROOT" add -A content
+  if git -C "$QUARTZ_ROOT" diff --cached --quiet; then
+    echo "No content changes to publish."
+  else
+    git -C "$QUARTZ_ROOT" commit -m "$COMMIT_MESSAGE"
+    git -C "$QUARTZ_ROOT" push origin v4
+    echo "Deployment triggered: https://github.com/Push1697/published_quartz_blog/actions"
+  fi
+fi
+
+echo "Garden publishing workflow completed successfully."

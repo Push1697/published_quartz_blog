@@ -1,4 +1,5 @@
 ---
+section: Guides
 title: Production Split Delivery Between Microsoft 365 Exchange Online and cPanel
 created: 2026-08-15
 tags:
