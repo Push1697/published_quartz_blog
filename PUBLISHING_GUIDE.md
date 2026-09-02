@@ -24,31 +24,60 @@ Both flags are required. `publish: true` marks the note as public content;
 `garden: true` opts it into this digital garden rather than another publishing
 destination.
 
-## Commands
+## Publishing automatically (no commands)
 
-Preview the exact sync without changing anything:
+The vault repository runs `.github/workflows/publish-garden.yml` on every push to
+`main` that touches a Markdown file. It checks out both repositories, runs the
+canonical `scripts/publish-garden` publisher, and pushes the result here, which in
+turn triggers the Pages deployment.
+
+The everyday flow is therefore:
+
+1. Add `publish: true` and `garden: true` to a note.
+2. Commit and push the vault.
+3. The garden updates itself a minute or two later.
+
+To run or preview it by hand, use the vault repository's **Actions ▸ Publish
+garden notes ▸ Run workflow** (tick *dry run* to list what would publish without
+changing anything).
+
+One-time setup: a fine-grained PAT with **Contents: read and write** on
+`Push1697/published_quartz_blog`, stored in the **vault** repository as the secret
+`GARDEN_PUBLISH_TOKEN`.
+
+## Commands (manual publishing)
+
+Two publishers implement the same contract — use whichever matches the machine you
+are on. `scripts/publish-garden` (bash) is canonical, and the Actions workflow runs
+it.
+
+**Linux / macOS:**
 
 ```bash
-publish-garden --dry-run
-```
-
-Sync and run a production Quartz build:
-
-```bash
-publish-garden
-```
-
-Sync, build, commit the public content, and push it to GitHub:
-
-```bash
+publish-garden --dry-run                              # preview only
+publish-garden                                        # sync + build
 publish-garden --push -m "Publish new Kubernetes note"
 ```
+
+**Windows (PowerShell):**
+
+```powershell
+.\scripts\publish-garden.ps1 -DryRun                  # preview only
+.\scripts\publish-garden.ps1 -SyncOnly                # sync without building
+.\scripts\publish-garden.ps1 -Push -m "Publish new Kubernetes note"
+```
+
+The bash publisher needs `rsync` and `flock`, which Git Bash on Windows does not
+provide — that is why the PowerShell port exists. A local build needs dependencies
+installed (`npm ci`); without them use `-SyncOnly`, since GitHub Actions builds the
+site regardless.
 
 The push triggers `.github/workflows/deploy.yml` on branch `v4`.
 
 ## Safety model
 
 - Only Markdown notes containing both public flags in YAML frontmatter are copied.
+- The flags are read **only** from the frontmatter block at the very top of the file. `publish: true` written in the body — for example inside a fenced code block that documents this workflow — does not publish the note.
 - `.obsidian`, `.git`, `.trash`, and every unselected note remain outside Quartz.
 - `content/index.md` is a curated homepage and is always preserved.
 - Content is staged in a temporary directory before `rsync` updates Quartz.
@@ -59,14 +88,20 @@ The push triggers `.github/workflows/deploy.yml` on branch `v4`.
 
 ## Paths
 
-Defaults:
+Defaults, by machine:
 
 ```text
-Vault:  /home/overflowbyte/Documents/obsidian/zettelkasten
-Quartz: /home/overflowbyte/Documents/obsidian/quartz_blog
+Linux
+  Vault:  /home/overflowbyte/Documents/obsidian/zettelkasten
+  Quartz: /home/overflowbyte/Documents/obsidian/quartz_blog
+
+Windows (PowerShell port)
+  Quartz: the repository containing scripts/
+  Vault:  the sibling directory named "zettelkasten"
 ```
 
-For a different location, set `GARDEN_VAULT` or `GARDEN_QUARTZ`.
+For a different location, set `GARDEN_VAULT` or `GARDEN_QUARTZ`. Both publishers
+and the Actions workflow honour these variables.
 
 ## Site configuration
 
