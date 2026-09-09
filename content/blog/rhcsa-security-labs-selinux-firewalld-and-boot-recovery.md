@@ -11,12 +11,15 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 4
+series_group: Month 1 — Core RHEL
 description: SELinux contexts and booleans, firewalld zones and rich rules, the four boot failures, and a saboteur script that breaks a RHEL box ten different ways so you can practise repairing it.
 ---
 
 # RHCSA Security Labs - SELinux firewalld and Boot Recovery
 
-Week 3 of [[RHCSA to RHCE - A 60-Day Lab Curriculum]]. SELinux, firewalld and
+Week 3 of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]]. SELinux, firewalld and
 boot recovery — and then you deliberately destroy things and repair them.
 
 > **The rule for this week: no search engine, no AI, no notes from previous
@@ -252,7 +255,7 @@ Keep a log. It becomes your revision list before the mock exams:
 | Disk full but `du` disagrees | `lsof +L1`, deleted-but-open file handles |
 
 When these ten faults stop being interesting, the harder set is in
-[[Ten Advanced RHEL Break-Fix Drills]] — one symptom with three causes, faults
+[[ten-advanced-rhel-break-fix-drills|Ten Advanced RHEL Break-Fix Drills]] — one symptom with three causes, faults
 that only appear after a reboot, and a permissions problem that is not one.
 
 ---
@@ -268,4 +271,4 @@ labs 2.5 and 2.6 in **two hours total**, closed-book.
 - [ ] `findmnt --verify` is now automatic before any reboot
 - [ ] I can reset a root password from GRUB from memory
 
-→ Next: [[RHCSA Container and Kernel Labs]]
+→ Next: [[rhcsa-container-and-kernel-labs|RHCSA Container and Kernel Labs]]

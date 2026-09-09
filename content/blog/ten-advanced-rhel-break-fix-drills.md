@@ -11,6 +11,9 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 14
+series_group: Companions
 description: Ten RHEL faults that hide - silent until a reboot, one symptom with three causes, and two that look like permissions problems and are not. A saboteur stages them, and only reveals the cause once you have repaired it.
 ---
 
@@ -24,9 +27,9 @@ Several stay silent until a reboot. One puts three independent causes behind a
 single symptom. Two present as permissions problems that are not permissions
 problems at all.
 
-Part of [[RHCSA to RHCE - A 60-Day Lab Curriculum]], and the harder counterpart
+Part of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]], and the harder counterpart
 to the drills in
-[[RHCSA Security Labs - SELinux firewalld and Boot Recovery]]. Scripts:
+[[rhcsa-security-labs-selinux-firewalld-and-boot-recovery|RHCSA Security Labs - SELinux firewalld and Boot Recovery]]. Scripts:
 **[github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs](https://github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs)**
 
 > **Snapshot first, every single time.** Some of these fill a filesystem, move
@@ -332,6 +335,6 @@ automatic; a flat one means you are still guessing.
 - [ ] I wrote my own layer list before reading the spoiler, and it was close
 
 The counterpart to the saboteur is the grader:
-[[Verifying Your Own Labs Offline]]. `./verify advanced` also works as a general
+[[verifying-your-own-labs-offline|Verifying Your Own Labs Offline]]. `./verify advanced` also works as a general
 sanity sweep — every section passes on a healthy box, so it is worth running
 before any mock exam.

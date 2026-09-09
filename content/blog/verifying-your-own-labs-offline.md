@@ -10,6 +10,9 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 13
+series_group: Companions
 description: An offline bash harness that grades a RHEL lab against its acceptance criteria, proves a fix survived a reboot by tracking boot IDs, and scores mock exams the way Red Hat does.
 ---
 
@@ -24,7 +27,7 @@ machine, checks it against the lab's **acceptance criteria**, and tells you what
 is unmet — never how to fix it, because that part is the lab.
 
 Bash and coreutils only. No network, nothing to install, nothing sent anywhere.
-Part of [[RHCSA to RHCE - A 60-Day Lab Curriculum]]; source at
+Part of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]]; source at
 **[github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs](https://github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs)**.
 
 ## What it looks like
@@ -143,8 +146,8 @@ usernames, UIDs, sizes, ports — so the grading is deterministic:
 ./verify ex200-b --spec > ~/paper.txt
 ```
 
-Papers: [[Two RHCSA Mock Exam Papers]] and
-[[Ansible Scenario Labs and the EX294 Mock]].
+Papers: [[two-rhcsa-mock-exam-papers|Two RHCSA Mock Exam Papers]] and
+[[ansible-scenario-labs-and-the-ex294-mock|Ansible Scenario Labs and the EX294 Mock]].
 
 ## Grading automation with the same checks
 
@@ -162,7 +165,7 @@ a_remote_verify() {
 ```
 
 You never log in, which is the rule for that week
-([[Automating the RHCSA Set with Ansible]]). The Ansible checkers additionally
+([[automating-the-rhcsa-set-with-ansible|Automating the RHCSA Set with Ansible]]). The Ansible checkers additionally
 run your playbooks twice, because idempotence cannot be verified any other way.
 
 ## What a script will not grade
@@ -246,4 +249,4 @@ sudo reboot
 ```
 
 The counterpart is a script that breaks the machine instead of grading it:
-[[Ten Advanced RHEL Break-Fix Drills]].
+[[ten-advanced-rhel-break-fix-drills|Ten Advanced RHEL Break-Fix Drills]].

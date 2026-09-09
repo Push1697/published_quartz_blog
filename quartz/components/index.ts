@@ -28,6 +28,7 @@ import ShelfPreview from "./ShelfPreview"
 import KnowledgeNav from "./KnowledgeNav"
 import PublishedNotes from "./PublishedNotes"
 import RelatedNotes from "./RelatedNotes"
+import SeriesNav from "./SeriesNav"
 
 export {
   ArticleTitle,
@@ -60,4 +61,5 @@ export {
   KnowledgeNav,
   PublishedNotes,
   RelatedNotes,
+  SeriesNav,
 }

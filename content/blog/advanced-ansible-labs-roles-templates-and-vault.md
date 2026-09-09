@@ -11,12 +11,15 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 9
+series_group: Month 2 — Ansible
 description: Jinja2 templates driven by facts, decomposing a monolithic playbook into roles, Ansible Vault used unattended with two vault IDs, collections, and failure handling at scale.
 ---
 
 # Advanced Ansible Labs - Roles Templates and Vault
 
-Week 7 of [[RHCSA to RHCE - A 60-Day Lab Curriculum]], and the hardest learning
+Week 7 of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]], and the hardest learning
 week. By the end of it you must not own a single 500-line playbook. You must own
 **reusable structure**.
 
@@ -184,7 +187,7 @@ This matters more than it looks. Several modules RHCSA-style work depends on —
 **firewalld, selinux, mount, acl, parted, lvg, lvol** — are not in
 `ansible.builtin`. If `ansible-doc firewalld` returns nothing during an exam, you
 needed a collection and did not check. Full mapping:
-[[Manual to Ansible - A Module Map]].
+[[manual-to-ansible-a-module-map|Manual to Ansible - A Module Map]].
 
 ---
 
@@ -232,4 +235,4 @@ those automatically too.
 - [ ] I can explain defaults versus vars precedence without looking it up
 - [ ] Templates use facts and conditionals, not hardcoded values
 
-→ Next: [[Ansible Scenario Labs and the EX294 Mock]]
+→ Next: [[ansible-scenario-labs-and-the-ex294-mock|Ansible Scenario Labs and the EX294 Mock]]

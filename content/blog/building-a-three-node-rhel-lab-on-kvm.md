@@ -11,6 +11,9 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 2
+series_group: Start here
 description: Build a three-node RHEL lab on KVM/libvirt with thin qcow2 overlays, cloud-init and instant snapshot recovery - the environment the RHCSA and RHCE labs run on.
 ---
 
@@ -42,7 +45,7 @@ Total footprint is about 4 GB of RAM and, thanks to thin overlays, a few hundred
 megabytes of disk beyond the single base image.
 
 This is the environment used by
-[[RHCSA to RHCE - A 60-Day Lab Curriculum]]. Scripts:
+[[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]]. Scripts:
 **[github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs](https://github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs)**
 
 ## 1. Host prerequisites
@@ -188,7 +191,7 @@ db
 
 Two hosts in four overlapping groups is deliberate: it lets the variable
 precedence and environment-separation labs in
-[[Advanced Ansible Labs - Roles Templates and Vault]] work on a two-node lab.
+[[advanced-ansible-labs-roles-templates-and-vault|Advanced Ansible Labs - Roles Templates and Vault]] work on a two-node lab.
 
 > **The `ansible.cfg` trap.** Ansible silently ignores an `ansible.cfg` that
 > lives in a **world-writable** directory. If your config seems to have no
@@ -238,4 +241,4 @@ Each side checks what only it can see, so run it in both places.
 
 ## Next
 
-→ [[RHCSA Foundation Labs - Users Permissions and Storage]]
+→ [[rhcsa-foundation-labs-users-permissions-and-storage|RHCSA Foundation Labs - Users Permissions and Storage]]

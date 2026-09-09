@@ -10,12 +10,15 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 7
+series_group: Month 2 — Ansible
 description: Seven requirement-driven Ansible labs - inventory and config, ad-hoc administration, your first playbook, variable precedence, loops, handlers and error handling - graded on idempotence.
 ---
 
 # Ansible Fundamentals Labs
 
-Week 5 of [[RHCSA to RHCE - A 60-Day Lab Curriculum]], and where the RHCE half
+Week 5 of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]], and where the RHCE half
 properly begins. Seven labs, each stated as a requirement.
 
 > **The only reference you are allowed is `ansible-doc`.** Not the web, not a
@@ -31,7 +34,7 @@ properly begins. Seven labs, each stated as a requirement.
 > `ansible-doc -s` is the single highest-value command in this entire week.
 
 All work happens on the control node in `~/ansible/`, against the two managed
-nodes from [[Building a Three-Node RHEL Lab on KVM]]. Checkers:
+nodes from [[building-a-three-node-rhel-lab-on-kvm|Building a Three-Node RHEL Lab on KVM]]. Checkers:
 `./verify 5.1` … `5.7`
 ([the harness](https://github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs)).
 These ones **run your playbooks**, twice, because idempotence is the requirement
@@ -239,9 +242,9 @@ nodes from fresh to:
 
 Do not treat Ansible as a separate subject. Every RHCSA task has a module, and
 the mapping is the most valuable reference in this curriculum:
-[[Manual to Ansible - A Module Map]].
+[[manual-to-ansible-a-module-map|Manual to Ansible - A Module Map]].
 
 Next week you re-do every Month 1 lab through Ansible, with one rule: you may not
 log into a managed node to fix anything.
 
-→ Next: [[Automating the RHCSA Set with Ansible]]
+→ Next: [[automating-the-rhcsa-set-with-ansible|Automating the RHCSA Set with Ansible]]

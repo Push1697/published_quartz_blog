@@ -11,6 +11,9 @@ tags:
   - systemd
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 3
+series_group: Month 1 — Core RHEL
 description: Fourteen requirement-driven RHCSA labs covering users, ACLs, sudo, SSH, systemd, journald, dnf, nmcli, partitions, LVM, NFS and autofs - with acceptance criteria instead of walkthroughs.
 ---
 
@@ -20,8 +23,8 @@ Fourteen labs covering the core RHCSA ground. Each one states a **requirement**
 and a set of **acceptance criteria**, and deliberately does not tell you which
 commands to use. Hints are collapsed; open them only after a genuine attempt.
 
-Part of [[RHCSA to RHCE - A 60-Day Lab Curriculum]]. Build the environment first:
-[[Building a Three-Node RHEL Lab on KVM]].
+Part of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]]. Build the environment first:
+[[building-a-three-node-rhel-lab-on-kvm|Building a Three-Node RHEL Lab on KVM]].
 
 > **Every lab ends with a reboot.** A configuration that works now but vanishes
 > after a restart is not finished — it would score zero. Snapshot before each
@@ -502,4 +505,4 @@ of this, and a shaky foundation here shows up as lost marks later.
 - [ ] I have rebooted after every lab and fixed what broke
 - [ ] Nothing on my week 1 "had to look up" list is still unresolved
 
-→ Next: [[RHCSA Security Labs - SELinux firewalld and Boot Recovery]]
+→ Next: [[rhcsa-security-labs-selinux-firewalld-and-boot-recovery|RHCSA Security Labs - SELinux firewalld and Boot Recovery]]

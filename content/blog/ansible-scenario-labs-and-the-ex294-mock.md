@@ -11,12 +11,15 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 10
+series_group: Month 2 — Ansible
 description: Five end-to-end Ansible scenarios, a saboteur that corrupts your automation project nine different ways, and a full four-hour EX294-style mock paper with every value pinned.
 ---
 
 # Ansible Scenario Labs and the EX294 Mock
 
-Week 8 of [[RHCSA to RHCE - A 60-Day Lab Curriculum]]. Stop watching courses.
+Week 8 of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]]. Stop watching courses.
 Every evening gets one scenario: read the requirement, build it, verify it,
 reboot, verify again. Then break it and repair it.
 
@@ -186,7 +189,7 @@ matches any group, an unclosed Jinja2 block, and a `notify:` pointing at a
 handler name that does not exist.
 
 Combine it with the host saboteur from
-[[RHCSA Security Labs - SELinux firewalld and Boot Recovery]] — a fault on the
+[[rhcsa-security-labs-selinux-firewalld-and-boot-recovery|RHCSA Security Labs - SELinux firewalld and Boot Recovery]] — a fault on the
 target *and* a fault in the automation at the same time is the realistic case.
 
 ### The error catalogue to drill
@@ -286,4 +289,4 @@ to full parity using **only** `site.yml`.
 > is not failure — it is the skill being tested. Freezing because you cannot
 > recall syntax is what costs marks.
 
-→ [[Red Hat Exam Day Protocol]] · [[Manual to Ansible - A Module Map]]
+→ [[red-hat-exam-day-protocol|Red Hat Exam Day Protocol]] · [[manual-to-ansible-a-module-map|Manual to Ansible - A Module Map]]

@@ -11,6 +11,9 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 1
+series_group: Start here
 description: A requirement-driven lab curriculum that takes you from core RHEL administration to Ansible automation in eight weeks, with scripts that grade your work and break your machines.
 ---
 
@@ -64,19 +67,19 @@ WEEK 1 ─────────────── WEEK 4 ──────�
 
 | Week | Focus | Labs |
 | --- | --- | --- |
-| 1 | Files, users, permissions, ACLs, sudo, SSH, bash | [[RHCSA Foundation Labs - Users Permissions and Storage]] |
-| 2 | systemd, dnf, networking, storage, LVM, NFS | [[RHCSA Foundation Labs - Users Permissions and Storage]] |
-| 3 | SELinux, firewalld, boot recovery, **break-fix** | [[RHCSA Security Labs - SELinux firewalld and Boot Recovery]] |
-| 4 | Containers, tuned, kernel, **mock exams** | [[RHCSA Container and Kernel Labs]] · [[Two RHCSA Mock Exam Papers]] |
+| 1 | Files, users, permissions, ACLs, sudo, SSH, bash | [[rhcsa-foundation-labs-users-permissions-and-storage|RHCSA Foundation Labs - Users Permissions and Storage]] |
+| 2 | systemd, dnf, networking, storage, LVM, NFS | [[rhcsa-foundation-labs-users-permissions-and-storage|RHCSA Foundation Labs - Users Permissions and Storage]] |
+| 3 | SELinux, firewalld, boot recovery, **break-fix** | [[rhcsa-security-labs-selinux-firewalld-and-boot-recovery|RHCSA Security Labs - SELinux firewalld and Boot Recovery]] |
+| 4 | Containers, tuned, kernel, **mock exams** | [[rhcsa-container-and-kernel-labs|RHCSA Container and Kernel Labs]] · [[two-rhcsa-mock-exam-papers|Two RHCSA Mock Exam Papers]] |
 
 ### Month 2 — Ansible
 
 | Week | Focus | Labs |
 | --- | --- | --- |
-| 5 | Inventories, ad-hoc, playbooks, variables, loops, handlers | [[Ansible Fundamentals Labs]] |
-| 6 | Re-do every Month 1 lab *through* Ansible | [[Automating the RHCSA Set with Ansible]] |
-| 7 | Roles, Jinja2, Vault, collections, failure handling | [[Advanced Ansible Labs - Roles Templates and Vault]] |
-| 8 | Full scenarios, deliberate breakage, mock exam | [[Ansible Scenario Labs and the EX294 Mock]] |
+| 5 | Inventories, ad-hoc, playbooks, variables, loops, handlers | [[ansible-fundamentals-labs|Ansible Fundamentals Labs]] |
+| 6 | Re-do every Month 1 lab *through* Ansible | [[automating-the-rhcsa-set-with-ansible|Automating the RHCSA Set with Ansible]] |
+| 7 | Roles, Jinja2, Vault, collections, failure handling | [[advanced-ansible-labs-roles-templates-and-vault|Advanced Ansible Labs - Roles Templates and Vault]] |
+| 8 | Full scenarios, deliberate breakage, mock exam | [[ansible-scenario-labs-and-the-ex294-mock|Ansible Scenario Labs and the EX294 Mock]] |
 
 Week 6 is the hinge, and the one most plans miss entirely. Everything you did by
 hand in weeks 1–3 you do again as playbooks, against freshly reverted nodes, with
@@ -94,7 +97,7 @@ Replace it with:
 Same topic, same day, both halves. On the day you create users with `useradd`,
 you also write the `user` module task. The bridge between the two certifications
 gets built daily rather than saved up — the mapping is in
-[[Manual to Ansible - A Module Map]].
+[[manual-to-ansible-a-module-map|Manual to Ansible - A Module Map]].
 
 ## Time budget
 
@@ -141,7 +144,7 @@ subscription registration gets old by the sixth time.
 **3. Use only the documentation the exam gives you.** `man`, `--help`,
 `/usr/share/doc`, and for the Ansible exam `ansible-doc`. Build that reflex from
 week 1, because reaching for documentation is not failure — it is the skill being
-measured. Full protocol: [[Red Hat Exam Day Protocol]].
+measured. Full protocol: [[red-hat-exam-day-protocol|Red Hat Exam Day Protocol]].
 
 ## The tooling
 
@@ -166,12 +169,12 @@ sudo ./break/break-advanced.sh random --yes
 sudo ./break/break-advanced.sh reveal
 ```
 
-How the harness works: [[Verifying Your Own Labs Offline]]. The hardest drills:
-[[Ten Advanced RHEL Break-Fix Drills]].
+How the harness works: [[verifying-your-own-labs-offline|Verifying Your Own Labs Offline]]. The hardest drills:
+[[ten-advanced-rhel-break-fix-drills|Ten Advanced RHEL Break-Fix Drills]].
 
 ## Start here
 
-1. Build the lab: [[Building a Three-Node RHEL Lab on KVM]]
+1. Build the lab: [[building-a-three-node-rhel-lab-on-kvm|Building a Three-Node RHEL Lab on KVM]]
 2. Do not start week 1 until `sudo ./verify env` passes every line.
 3. Work the labs from their *requirements*. Read the hints only after a genuine
    attempt — a lab you were walked through teaches you nothing about an exam you
@@ -183,16 +186,16 @@ How the harness works: [[Verifying Your Own Labs Offline]]. The hardest drills:
 
 | Article | What it covers |
 | --- | --- |
-| [[Building a Three-Node RHEL Lab on KVM]] | The environment: three nodes, thin overlays, snapshots, acceptance test |
-| [[RHCSA Foundation Labs - Users Permissions and Storage]] | Weeks 1–2: 14 labs from text processing to LVM and NFS |
-| [[RHCSA Security Labs - SELinux firewalld and Boot Recovery]] | Week 3: SELinux, firewalld, the four boot failures, break-fix drills |
-| [[RHCSA Container and Kernel Labs]] | Week 4: rootless podman, tuned, kernel management |
-| [[Two RHCSA Mock Exam Papers]] | Two full 2.5-hour papers with every value pinned |
-| [[Ansible Fundamentals Labs]] | Week 5: inventory, ad-hoc, playbooks, variables, loops, handlers |
-| [[Automating the RHCSA Set with Ansible]] | Week 6: every Month 1 lab, redone as automation |
-| [[Advanced Ansible Labs - Roles Templates and Vault]] | Week 7: roles, Jinja2, Vault, collections, failure at scale |
-| [[Ansible Scenario Labs and the EX294 Mock]] | Week 8: five scenarios, the Ansible saboteur, the mock paper |
-| [[Manual to Ansible - A Module Map]] | Every RHCSA task, its command, its module, and its collection |
-| [[Red Hat Exam Day Protocol]] | The loop to run on every exam task, and the zero-mark mistakes |
-| [[Verifying Your Own Labs Offline]] | The check harness: how it grades, and how it proves persistence |
-| [[Ten Advanced RHEL Break-Fix Drills]] | Faults that hide, faults with three causes, and the layer method |
+| [[building-a-three-node-rhel-lab-on-kvm|Building a Three-Node RHEL Lab on KVM]] | The environment: three nodes, thin overlays, snapshots, acceptance test |
+| [[rhcsa-foundation-labs-users-permissions-and-storage|RHCSA Foundation Labs - Users Permissions and Storage]] | Weeks 1–2: 14 labs from text processing to LVM and NFS |
+| [[rhcsa-security-labs-selinux-firewalld-and-boot-recovery|RHCSA Security Labs - SELinux firewalld and Boot Recovery]] | Week 3: SELinux, firewalld, the four boot failures, break-fix drills |
+| [[rhcsa-container-and-kernel-labs|RHCSA Container and Kernel Labs]] | Week 4: rootless podman, tuned, kernel management |
+| [[two-rhcsa-mock-exam-papers|Two RHCSA Mock Exam Papers]] | Two full 2.5-hour papers with every value pinned |
+| [[ansible-fundamentals-labs|Ansible Fundamentals Labs]] | Week 5: inventory, ad-hoc, playbooks, variables, loops, handlers |
+| [[automating-the-rhcsa-set-with-ansible|Automating the RHCSA Set with Ansible]] | Week 6: every Month 1 lab, redone as automation |
+| [[advanced-ansible-labs-roles-templates-and-vault|Advanced Ansible Labs - Roles Templates and Vault]] | Week 7: roles, Jinja2, Vault, collections, failure at scale |
+| [[ansible-scenario-labs-and-the-ex294-mock|Ansible Scenario Labs and the EX294 Mock]] | Week 8: five scenarios, the Ansible saboteur, the mock paper |
+| [[manual-to-ansible-a-module-map|Manual to Ansible - A Module Map]] | Every RHCSA task, its command, its module, and its collection |
+| [[red-hat-exam-day-protocol|Red Hat Exam Day Protocol]] | The loop to run on every exam task, and the zero-mark mistakes |
+| [[verifying-your-own-labs-offline|Verifying Your Own Labs Offline]] | The check harness: how it grades, and how it proves persistence |
+| [[ten-advanced-rhel-break-fix-drills|Ten Advanced RHEL Break-Fix Drills]] | Faults that hide, faults with three causes, and the layer method |

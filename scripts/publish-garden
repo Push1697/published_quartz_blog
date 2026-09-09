@@ -102,17 +102,63 @@ slugify() {
   printf '%s' "$1" | sed -E 's/\.md$//' | tr '[:upper:]' '[:lower:]' | sed -E 's/[^[:alnum:]]+/-/g; s/^-+//; s/-+$//'
 }
 
+# Notes are renamed to slugs on publish, so [[Note Title]] references would point
+# at files that no longer exist. Rewrite them to the published slug, keeping the
+# original text as the display alias. A target that is not published is left
+# exactly as it was, which is also what protects bash `[[ -f x ]]` inside code
+# fences from being touched.
 write_public_copy() {
-  awk -v section="$3" '
+  awk -v section="$3" -v mapfile="$4" '
+    function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
+
+    function rewrite_links(line,   out, pre, whole, inner, orig, anchor, alias, p, q) {
+      out = ""
+      while (match(line, /\[\[[^][]*\]\]/)) {
+        pre   = substr(line, 1, RSTART - 1)
+        whole = substr(line, RSTART, RLENGTH)
+        inner = substr(line, RSTART + 2, RLENGTH - 4)
+        line  = substr(line, RSTART + RLENGTH)
+        orig  = inner
+        alias = ""
+        p = index(inner, "|")
+        if (p > 0) { alias = substr(inner, p); inner = substr(inner, 1, p - 1) }
+        anchor = ""
+        q = index(inner, "#")
+        if (q > 0) { anchor = substr(inner, q); inner = substr(inner, 1, q - 1) }
+        inner = trim(inner)
+        if (inner in MAP) {
+          if (alias == "") alias = "|" inner
+          out = out pre "[[" MAP[inner] anchor alias "]]"
+        } else {
+          out = out pre whole
+        }
+      }
+      return out line
+    }
+
+    BEGIN {
+      while ((getline line < mapfile) > 0) {
+        t = index(line, "\t")
+        if (t > 0) MAP[substr(line, 1, t - 1)] = substr(line, t + 1)
+      }
+      close(mapfile)
+    }
+
     NR == 1 && $0 == "---" { in_frontmatter = 1; print; print "section: " section; next }
     in_frontmatter && $0 == "---" { in_frontmatter = 0; print; next }
     in_frontmatter && $0 ~ /^[[:space:]]*section:[[:space:]]*/ { next }
-    { print }
+    in_frontmatter { print; next }
+    { print rewrite_links($0) }
   ' "$1" > "$2"
 }
 
+# Pass 1: work out what publishes and what slug each note gets, so pass 2 can
+# rewrite the links between them.
 declare -A seen_slugs
-published_count=0
+declare -a sel_note sel_rel sel_slug sel_section
+LINK_MAP="$STAGING_ROOT/linkmap.tsv"
+: > "$LINK_MAP"
+
 while IFS= read -r -d '' note; do
   if has_public_frontmatter "$note"; then
     relative_path="${note#"$VAULT_ROOT"/}"
@@ -124,14 +170,27 @@ while IFS= read -r -d '' note; do
     seen_slugs["$slug"]=1
     section="$(frontmatter_section "$note")"
     [[ -n "$section" ]] || section="$(infer_section "$relative_path")"
-    destination="$STAGING_ROOT/content/blog/$slug.md"
-    write_public_copy "$note" "$destination" "$section"
-    printf '  include  blog/%s.md  ←  %s [%s]\n' "$slug" "$relative_path" "$section"
-    ((published_count += 1))
+
+    sel_note+=("$note")
+    sel_rel+=("$relative_path")
+    sel_slug+=("$slug")
+    sel_section+=("$section")
+
+    base="${relative_path##*/}"
+    printf '%s\t%s\n' "${base%.md}" "$slug" >> "$LINK_MAP"
   fi
 done < <(find "$VAULT_ROOT" \
   -type d \( -name .git -o -name .obsidian -o -name .trash \) -prune -o \
   -type f -name '*.md' -print0)
+
+# Pass 2: write the public copies.
+published_count=0
+for i in "${!sel_note[@]}"; do
+  destination="$STAGING_ROOT/content/blog/${sel_slug[$i]}.md"
+  write_public_copy "${sel_note[$i]}" "$destination" "${sel_section[$i]}" "$LINK_MAP"
+  printf '  include  blog/%s.md  ←  %s [%s]\n' "${sel_slug[$i]}" "${sel_rel[$i]}" "${sel_section[$i]}"
+  ((published_count += 1))
+done
 
 echo "Selected $published_count public note(s), plus the curated homepage."
 

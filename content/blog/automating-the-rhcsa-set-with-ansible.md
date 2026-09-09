@@ -10,12 +10,15 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 8
+series_group: Month 2 — Ansible
 description: "The week that joins the two certifications - every manual RHCSA lab redone as an idempotent playbook, against freshly reverted nodes, with one rule: never log in to fix anything."
 ---
 
 # Automating the RHCSA Set with Ansible
 
-Week 6 of [[RHCSA to RHCE - A 60-Day Lab Curriculum]], and the hinge of the whole
+Week 6 of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]], and the hinge of the whole
 thing. Everything you did by hand in weeks 1–3 you now do again — through
 Ansible. Nothing new to learn conceptually; everything to gain in fluency.
 
@@ -26,7 +29,7 @@ automating from a genuinely fresh machine.
 > anything.** If something is wrong, fix the playbook and re-run it. Log in only
 > to *verify*, never to repair. This rule is the entire point of the week.
 
-Reference throughout: [[Manual to Ansible - A Module Map]]. Checkers:
+Reference throughout: [[manual-to-ansible-a-module-map|Manual to Ansible - A Module Map]]. Checkers:
 `./verify 6.1` … `6.5`
 ([the harness](https://github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs)).
 
@@ -265,4 +268,4 @@ a broken host is a zero with a smile on it.
 - [ ] I know which modules need `ansible.posix` versus `community.general`
 - [ ] Storage automation works from blank disks
 
-→ Next: [[Advanced Ansible Labs - Roles Templates and Vault]]
+→ Next: [[advanced-ansible-labs-roles-templates-and-vault|Advanced Ansible Labs - Roles Templates and Vault]]

@@ -11,6 +11,9 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 5
+series_group: Month 1 — Core RHEL
 description: The two RHCSA objective areas older study plans skip - rootless podman containers with persistent storage and systemd auto-start, and tuned, grubby and boot target management.
 ---
 
@@ -20,7 +23,7 @@ Two areas that current RHCSA objectives include and that plans written a few
 years ago routinely omit entirely. If you prepared from older material, this is
 your gap.
 
-Week 4 of [[RHCSA to RHCE - A 60-Day Lab Curriculum]]. Checkers:
+Week 4 of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]]. Checkers:
 `./verify 4.1` (as your ordinary user) and `sudo ./verify 4.2`
 ([the harness](https://github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs)).
 
@@ -154,8 +157,8 @@ RHEL versions.
 Anything marked *shaky* or *can't* gets redone before you sit a mock. No
 exceptions — a mock exam taken over known gaps measures nothing.
 
-Labs 1.x and 2.x: [[RHCSA Foundation Labs - Users Permissions and Storage]].
-Labs 3.x: [[RHCSA Security Labs - SELinux firewalld and Boot Recovery]].
+Labs 1.x and 2.x: [[rhcsa-foundation-labs-users-permissions-and-storage|RHCSA Foundation Labs - Users Permissions and Storage]].
+Labs 3.x: [[rhcsa-security-labs-selinux-firewalld-and-boot-recovery|RHCSA Security Labs - SELinux firewalld and Boot Recovery]].
 
 ## The gate
 
@@ -166,5 +169,5 @@ Everything below must be true before Ansible begins.
 - [ ] Every fault in `break.sh list` fixed in under 10 minutes
 - [ ] `findmnt --verify` before every reboot is automatic
 
-→ Next: [[Two RHCSA Mock Exam Papers]], then
-[[Ansible Fundamentals Labs]]
+→ Next: [[two-rhcsa-mock-exam-papers|Two RHCSA Mock Exam Papers]], then
+[[ansible-fundamentals-labs|Ansible Fundamentals Labs]]

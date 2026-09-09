@@ -1,0 +1,191 @@
+// Series navigation: where you are in a reading order, and where to go next.
+
+.series-nav {
+  margin: 0 0 1.75rem;
+  border: 1px solid var(--lightgray);
+  border-left: 3px solid var(--secondary);
+  border-radius: 0.5rem;
+  background: var(--highlight);
+  padding: 0.85rem 1rem;
+}
+
+.series-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.series-id {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+}
+
+.series-name {
+  color: var(--dark);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.series-position {
+  color: var(--darkgray);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.series-group {
+  color: var(--gray);
+  font-weight: 500;
+}
+
+.series-progress {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--lightgray);
+
+  & > span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--secondary);
+  }
+}
+
+.series-contents {
+  margin-top: 0.7rem;
+
+  & > summary {
+    cursor: pointer;
+    color: var(--darkgray);
+    font-size: 0.76rem;
+    font-weight: 600;
+
+    &:hover {
+      color: var(--secondary);
+    }
+  }
+}
+
+.series-list {
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+
+  & li {
+    margin: 0;
+  }
+
+  & a,
+  & span[aria-current] {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    border-radius: 0.3rem;
+    padding: 0.3rem 0.4rem;
+    color: var(--darkgray);
+    font-size: 0.82rem;
+    line-height: 1.35;
+    text-decoration: none;
+  }
+
+  & a:hover {
+    background: var(--light);
+    color: var(--secondary);
+  }
+
+  & li.current span[aria-current] {
+    background: var(--light);
+    color: var(--dark);
+    font-weight: 700;
+  }
+}
+
+.series-list-group {
+  margin: 0.6rem 0 0.15rem;
+  padding: 0 0.4rem;
+  color: var(--gray);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.series-num {
+  flex: 0 0 1.35rem;
+  color: var(--gray);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: right;
+}
+
+// --- prev / next, after the article ------------------------------------------
+
+.series-steps {
+  display: grid;
+  max-width: 52rem;
+  margin: 2.5rem auto 0;
+  gap: 0.65rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.series-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid var(--lightgray);
+  border-radius: 0.45rem;
+  padding: 0.75rem 0.9rem;
+  color: var(--dark);
+  text-decoration: none;
+
+  &:hover {
+    border-color: var(--secondary);
+    background: var(--highlight);
+    color: var(--dark);
+  }
+
+  &.next {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  &.empty {
+    border: none;
+  }
+}
+
+.series-step-label {
+  color: var(--gray);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.series-step-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+@media (max-width: 800px) {
+  .series-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .series-step.next {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

@@ -24,6 +24,38 @@ Both flags are required. `publish: true` marks the note as public content;
 `garden: true` opts it into this digital garden rather than another publishing
 destination.
 
+## Publishing a series
+
+A set of notes meant to be read in order becomes a series. Add three more keys
+to every part:
+
+```yaml
+---
+title: Ansible Fundamentals Labs
+publish: true
+garden: true
+section: Guides
+series: RHCSA to RHCE          # identical string on every part
+series_order: 7                # 1, 2, 3 ... controls the reading order
+series_group: Month 2          # optional sub-heading within the series
+---
+```
+
+That gives the series, for free:
+
+- a banner on each part saying **Part 7 of 14**, with a progress bar and a
+  collapsible list of every part
+- previous/next links at the foot of each part, in order
+- one collapsible entry in the sidebar, ordered by part rather than
+  alphabetically, expanded only while you are reading it
+- one block on the homepage with a *Start reading* button, instead of the parts
+  being scattered through the section grid
+- `RelatedNotes` suppressed on series pages, since the series list already
+  covers it
+
+`section:` still applies and still decides where a part appears when browsing by
+topic. A note with no `series:` behaves exactly as before.
+
 ## Publishing automatically (no commands)
 
 The vault repository runs `.github/workflows/publish-garden.yml` on every push to
@@ -77,6 +109,11 @@ The push triggers `.github/workflows/deploy.yml` on branch `v4`.
 ## Safety model
 
 - Only Markdown notes containing both public flags in YAML frontmatter are copied.
+- `[[Wikilinks]]` between published notes are rewritten to the published slug,
+  keeping the original text as the display alias — the publisher renames notes on
+  the way out, so unrewritten links would 404. Links to notes that are **not**
+  published are left untouched, which is also what stops bash `[[ -f x ]]` inside
+  a code fence from being mangled.
 - The flags are read **only** from the frontmatter block at the very top of the file. `publish: true` written in the body — for example inside a fenced code block that documents this workflow — does not publish the note.
 - `.obsidian`, `.git`, `.trash`, and every unselected note remain outside Quartz.
 - `content/index.md` is a curated homepage and is always preserved.

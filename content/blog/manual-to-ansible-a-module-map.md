@@ -10,6 +10,9 @@ tags:
   - reference
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 11
+series_group: Companions
 description: Every RHCSA task mapped to its manual command, its Ansible module and the collection that module lives in - plus the collections trap that catches people out in the exam.
 ---
 
@@ -28,7 +31,7 @@ Do this on the *same day* for the *same topic*. On the day you create users by
 hand, you also write the `user` module task. The bridge gets built daily rather
 than saved up for one panicked week.
 
-Part of [[RHCSA to RHCE - A 60-Day Lab Curriculum]].
+Part of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]].
 
 ---
 
@@ -184,5 +187,5 @@ persistent mount that is also active right now needs the first.
 **`permanent: true` without `immediate: true`** on `firewalld`. You have then
 configured exactly one of the two states the exam checks. Set both.
 
-→ [[Ansible Fundamentals Labs]] · [[Automating the RHCSA Set with Ansible]] ·
-[[Red Hat Exam Day Protocol]]
+→ [[ansible-fundamentals-labs|Ansible Fundamentals Labs]] · [[automating-the-rhcsa-set-with-ansible|Automating the RHCSA Set with Ansible]] ·
+[[red-hat-exam-day-protocol|Red Hat Exam Day Protocol]]

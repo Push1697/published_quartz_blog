@@ -10,6 +10,9 @@ tags:
   - rhel
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 12
+series_group: Companions
 description: The loop to run on every task in a performance-based Red Hat exam - the persistence checklist, time management, the reboot ritual, and the nine mistakes that turn a working configuration into a zero.
 ---
 
@@ -19,7 +22,7 @@ Applies to any performance-based Red Hat exam. The loop below is identical for
 each; only the allowed documentation differs — the core RHEL exam gives you `man`
 and `/usr/share/doc`, the Ansible one adds `ansible-doc`.
 
-Part of [[RHCSA to RHCE - A 60-Day Lab Curriculum]].
+Part of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]].
 
 ---
 
@@ -171,8 +174,8 @@ None of the above works as advice; it only works as habit. The way to build the
 habit is to sit full timed mocks on a machine you have deliberately broken
 beforehand:
 
-- [[Two RHCSA Mock Exam Papers]] — two 2.5-hour papers, plus a hostile variant
-- [[Ansible Scenario Labs and the EX294 Mock]] — the four-hour Ansible paper
-- [[Verifying Your Own Labs Offline]] — a grader that scores only what survived a
+- [[two-rhcsa-mock-exam-papers|Two RHCSA Mock Exam Papers]] — two 2.5-hour papers, plus a hostile variant
+- [[ansible-scenario-labs-and-the-ex294-mock|Ansible Scenario Labs and the EX294 Mock]] — the four-hour Ansible paper
+- [[verifying-your-own-labs-offline|Verifying Your Own Labs Offline]] — a grader that scores only what survived a
   reboot
-- [[Ten Advanced RHEL Break-Fix Drills]] — for the troubleshooting half
+- [[ten-advanced-rhel-break-fix-drills|Ten Advanced RHEL Break-Fix Drills]] — for the troubleshooting half

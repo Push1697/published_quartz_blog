@@ -147,12 +147,37 @@ function Get-PathHash {
     }
 }
 
+function Convert-Wikilinks {
+    # The publisher renames notes to slugs, so [[Note Title]] references would
+    # point at files that no longer exist. Rewrite them to the published slug and
+    # keep the original text as the display alias. Targets that are not published
+    # are left untouched, which also protects bash `[[ -f x ]]` inside code
+    # fences from being rewritten.
+    param([string]$Line, [hashtable]$LinkMap)
+    if ($Line -notmatch '\[\[') { return $Line }
+    $evaluator = {
+        param($m)
+        $inner = $m.Groups[1].Value
+        $alias = ''
+        $bar = $inner.IndexOf('|')
+        if ($bar -ge 0) { $alias = $inner.Substring($bar); $inner = $inner.Substring(0, $bar) }
+        $anchor = ''
+        $hash = $inner.IndexOf('#')
+        if ($hash -ge 0) { $anchor = $inner.Substring($hash); $inner = $inner.Substring(0, $hash) }
+        $target = $inner.Trim()
+        if (-not $LinkMap.ContainsKey($target)) { return $m.Value }
+        if ([string]::IsNullOrEmpty($alias)) { $alias = '|' + $target }
+        return '[[' + $LinkMap[$target] + $anchor + $alias + ']]'
+    }
+    return [regex]::Replace($Line, '\[\[([^\[\]]*)\]\]', $evaluator)
+}
+
 function Write-PublicCopy {
     # Copies the note, injecting `section:` as the first frontmatter key and
     # dropping any pre-existing section line. Always writes LF: .gitattributes
     # normalises this repo to eol=lf, so LF output keeps diffs clean whether the
     # publish ran from Windows or Linux.
-    param([string[]]$Lines, [string]$Destination, [string]$Section)
+    param([string[]]$Lines, [string]$Destination, [string]$Section, [hashtable]$LinkMap)
     $out = New-Object System.Collections.Generic.List[string]
     $inFrontmatter = $false
     for ($i = 0; $i -lt $Lines.Count; $i++) {
@@ -169,6 +194,7 @@ function Write-PublicCopy {
             continue
         }
         if ($inFrontmatter -and $line -match '^\s*section:\s*') { continue }
+        if (-not $inFrontmatter -and $LinkMap) { $line = Convert-Wikilinks -Line $line -LinkMap $LinkMap }
         $out.Add($line)
     }
     [System.IO.File]::WriteAllText($Destination, (($out -join "`n") + "`n"), $utf8NoBom)
@@ -191,6 +217,9 @@ try {
     $seenSlugs = @{}
     $publishedCount = 0
 
+    # Pass 1: decide what publishes and what slug each note gets, so pass 2 can
+    # rewrite [[wikilinks]] between them to slugs that actually exist.
+    $selected = New-Object System.Collections.Generic.List[object]
     foreach ($note in ($notes | Sort-Object FullName)) {
         $lines = [System.IO.File]::ReadAllLines($note.FullName)
         $fm = Get-Frontmatter -Lines $lines
@@ -204,8 +233,24 @@ try {
         $section = Get-FrontmatterSection -Frontmatter $fm
         if ([string]::IsNullOrWhiteSpace($section)) { $section = Get-InferredSection -RelativePath $relativePath }
 
-        Write-PublicCopy -Lines $lines -Destination (Join-Path $stagingRoot "blog\$slug.md") -Section $section
-        Write-Host ("  include  blog/{0}.md  <-  {1} [{2}]" -f $slug, $relativePath, $section) -ForegroundColor Green
+        $selected.Add([pscustomobject]@{
+            Lines        = $lines
+            RelativePath = $relativePath
+            Slug         = $slug
+            Section      = $section
+            Name         = [System.IO.Path]::GetFileNameWithoutExtension($note.Name)
+        })
+    }
+
+    # note filename (without .md) -> published slug
+    $linkMap = @{}
+    foreach ($item in $selected) { $linkMap[$item.Name] = $item.Slug }
+
+    # Pass 2: write the public copies, with links pointing at real slugs.
+    foreach ($item in $selected) {
+        $destination = Join-Path $stagingRoot ("blog\" + $item.Slug + ".md")
+        Write-PublicCopy -Lines $item.Lines -Destination $destination -Section $item.Section -LinkMap $linkMap
+        Write-Host ("  include  blog/{0}.md  <-  {1} [{2}]" -f $item.Slug, $item.RelativePath, $item.Section) -ForegroundColor Green
         $publishedCount++
     }
 

@@ -10,6 +10,9 @@ tags:
   - labs
 publish: true
 garden: true
+series: RHCSA → RHCE
+series_order: 6
+series_group: Month 1 — Core RHEL
 description: Two full 2.5-hour RHCSA mock papers with every ambiguous value pinned, plus a hostile third variant, and a grader that scores tasks fully correct out of 300 against the real 210 pass mark.
 ---
 
@@ -19,7 +22,7 @@ Two complete papers, sat under real conditions. Every value is pinned —
 usernames, UIDs, GIDs, sizes, ports, profile names — so that grading is
 deterministic and you cannot argue with the result.
 
-Part of [[RHCSA to RHCE - A 60-Day Lab Curriculum]]. Graders:
+Part of [[rhcsa-to-rhce-a-60-day-lab-curriculum|RHCSA to RHCE - A 60-Day Lab Curriculum]]. Graders:
 `./verify ex200-a --spec` and `./verify ex200-b --spec` print these papers;
 `sudo ./verify ex200-a --after-reboot` scores them
 ([the harness](https://github.com/Push1697/published_quartz_blog/tree/v4/rhce-labs)).
@@ -130,8 +133,8 @@ asked to configure it further is much closer to both the exam and the job than a
 clean machine ever is.
 
 The faults are described in
-[[RHCSA Security Labs - SELinux firewalld and Boot Recovery]] and
-[[Ten Advanced RHEL Break-Fix Drills]].
+[[rhcsa-security-labs-selinux-firewalld-and-boot-recovery|RHCSA Security Labs - SELinux firewalld and Boot Recovery]] and
+[[ten-advanced-rhel-break-fix-drills|Ten Advanced RHEL Break-Fix Drills]].
 
 ---
 
@@ -164,4 +167,4 @@ configuration into a zero:
 If you can name which requirement in each paper hides which trap, you have
 understood the exam better than most of the material available for it.
 
-→ Full protocol: [[Red Hat Exam Day Protocol]]
+→ Full protocol: [[red-hat-exam-day-protocol|Red Hat Exam Day Protocol]]
