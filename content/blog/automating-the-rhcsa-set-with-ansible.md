@@ -10,7 +10,7 @@ tags:
   - labs
 publish: true
 garden: true
-description: The week that joins the two certifications - every manual RHCSA lab redone as an idempotent playbook, against freshly reverted nodes, with one rule: never log in to fix anything.
+description: "The week that joins the two certifications - every manual RHCSA lab redone as an idempotent playbook, against freshly reverted nodes, with one rule: never log in to fix anything."
 ---
 
 # Automating the RHCSA Set with Ansible
