@@ -23,6 +23,9 @@ interface RenderComponents {
 }
 
 const headerRegex = new RegExp(/h[1-6]/)
+
+// One value per build, shared by every page, used to bust the CSS cache.
+const cssBuildVersion = Date.now().toString(36)
 export function pageResources(
   baseDir: FullSlug | RelativeURL,
   staticResources: StaticResources,
@@ -33,7 +36,10 @@ export function pageResources(
   const resources: StaticResources = {
     css: [
       {
-        content: joinSegments(baseDir, "index.css"),
+        // GitHub Pages serves index.css with max-age=14400 and the filename never
+        // changes, so a restyle stayed invisible to returning visitors for four
+        // hours. Version it per build so a deploy is picked up immediately.
+        content: joinSegments(baseDir, `index.css?v=${cssBuildVersion}`),
       },
       ...staticResources.css,
     ],

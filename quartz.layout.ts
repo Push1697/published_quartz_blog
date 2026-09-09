@@ -50,8 +50,20 @@ export const defaultContentPageLayout: PageLayout = {
     // on a long article the table of contents is the most-used control, so it
     // leads. The rest is exploration, and sits below the fold happily.
     Component.DesktopOnly(Component.TableOfContents()),
-    Component.Graph({
-      localGraph: { depth: 1, scale: 1, repelForce: 0.5, linkDistance: 30 },
+    // The homepage has no outgoing links into the notes, so a depth-1 local
+    // graph renders an empty box there. Show the whole graph instead — on the
+    // front page that is the more useful view anyway.
+    Component.ConditionalRender({
+      component: Component.Graph({
+        localGraph: { depth: -1, scale: 0.9, repelForce: 0.6, linkDistance: 35 },
+      }),
+      condition: (page) => page.fileData.slug === "index",
+    }),
+    Component.ConditionalRender({
+      component: Component.Graph({
+        localGraph: { depth: 1, scale: 1, repelForce: 0.5, linkDistance: 30 },
+      }),
+      condition: (page) => page.fileData.slug !== "index",
     }),
     // a note inside a series already has ordered prev/next and a full contents
     // list, so "related" would only repeat it — show it for standalone notes.

@@ -1,5 +1,7 @@
 ---
 section: Troubleshooting
+
+title: "Fix: Vivaldi Snap Startup Issue (GLIBC Mismatch)"
 created: 2026-01-27
 tags:
   - linux
@@ -9,6 +11,8 @@ tags:
   - guide
 publish: true
 garden: true
+
+description: Vivaldi installed via Snap fails to launch with a GLIBC_2.38 error - why the chromium-ffmpeg snap caused it, and how to revert to a working revision.
 ---
 
 # Fix: Vivaldi Snap Startup Issue (GLIBC Mismatch)

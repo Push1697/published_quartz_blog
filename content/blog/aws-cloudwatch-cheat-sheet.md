@@ -10,6 +10,8 @@ tags:
   - Cheatsheet
 publish: true
 garden: true
+
+description: A one-page CloudWatch reference for certification exams - metrics, alarms, logs, agents, and a decision diagram for picking the right service.
 ---
 
 # AWS CloudWatch Exam Cheat Sheet (One-Page)
