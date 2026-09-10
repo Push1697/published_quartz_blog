@@ -3,8 +3,8 @@
 # Run on rhel01, as root.
 . "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../lib/verify-lib.sh"
 
-NET=192.168.124.0/24
-BAD=192.168.124.99
+NET=$(lab_net).0/24
+BAD=$(lab_net).99
 
 fw()  { firewall-cmd "$@" 2>/dev/null; }
 
@@ -61,6 +61,7 @@ runtime_matches_permanent() {
 
 # ------------------------------------------------------------------------------
 lab_init "3.3" "firewalld zones, services, ports, rich rules" --host rhel01 --root "$@"
+info "lab network $NET · blocked host $BAD · $(lab_platform)"
 
 need_cmd "every check in this lab" firewall-cmd || { summary; exit 1; }
 check "firewalld is running" systemctl is-active --quiet firewalld

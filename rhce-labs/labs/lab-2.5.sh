@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Lab 2.5 — Partitions, filesystems, swap, fstab    (01-Labs-RHCSA-Foundation)
-# Run on rhel01, as root. Uses the blank disk /dev/vdb.
+# Run on rhel01, as root. Uses the first blank lab disk (vdb on KVM,
+# sdb on VirtualBox) — detected, not assumed.
 . "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../lib/verify-lib.sh"
 
-DISK=/dev/vdb
+DISK=$(lab_disk 1)
 P1=${DISK}1
 P2=${DISK}2
 
@@ -39,6 +40,15 @@ swap_persistent() {
   [[ -n ${line:-} ]] && grep -Eq 'pri=10' <<<"$line"
 }
 
+# The filesystem must have been grown, not just the partition.
+fs_fills_partition() {
+  local pb fb
+  pb=$(lsblk -bno SIZE "$P1" 2>/dev/null | head -1)
+  fb=$(df -B1 --output=size /data 2>/dev/null | tail -1 | tr -d ' ')
+  echo "partition $pb bytes, filesystem $fb bytes"
+  [[ -n ${pb:-} && -n ${fb:-} ]] && awk -v p="$pb" -v f="$fb" 'BEGIN { exit !(f > p * 0.9) }'
+}
+
 noexec_enforced() {
   local f=/data/verify-noexec-$$.sh rc=0
   printf '#!/bin/bash\necho hi\n' > "$f" 2>/dev/null || { echo "could not write to /data"; return 1; }
@@ -56,7 +66,13 @@ noexec_enforced() {
 # ------------------------------------------------------------------------------
 lab_init "2.5" "Partitions, filesystems, swap, fstab" --host rhel01 --root "$@"
 
-section "1. Partition layout on /dev/vdb"
+if [[ -z ${DISK:-} ]]; then
+  fail "a blank lab disk is attached"     "no disk other than the root disk was found — check the lab VM has its extra disks"
+  summary; exit 1
+fi
+info "using lab disk: $DISK ($(lab_platform))"
+
+section "1. Partition layout on $DISK"
 check_sh "$DISK exists" "[[ -b $DISK ]]"
 check_sh "$P1 exists" "[[ -b $P1 ]]"
 check_sh "$P2 exists" "[[ -b $P2 ]]"
@@ -73,7 +89,7 @@ check_eq "its label is DATA" "DATA" "$(lsblk -no LABEL "$P1" 2>/dev/null | head 
 section "3. /data is mounted by UUID, persistently"
 check "/data is mounted right now" findmnt /data
 check_eq "and it is $P1 that is mounted there" "$P1" "$(mount_src /data)"
-check -p "the fstab entry uses UUID=, not /dev/vdb1" fstab_uses_uuid
+check -p "the fstab entry uses UUID=, not $P1" fstab_uses_uuid
 check -p "findmnt --verify is happy with /etc/fstab" findmnt --verify
 
 section "4. Mount options: noexec and nodev"
@@ -93,7 +109,6 @@ report "all swap in use" bash -c 'swapon --show'
 section "6. The filesystem was grown after the partition"
 check "/data reports about 4 GiB" data_is_about_4g
 check "the filesystem fills the partition (no wasted space)" \
-  bash -c 'p=$(lsblk -bno SIZE /dev/vdb1 | head -1); f=$(df -B1 --output=size /data | tail -1);
-           awk -v p="$p" -v f="$f" "BEGIN { exit !(f > p * 0.9) }"'
+  fs_fills_partition
 
 summary

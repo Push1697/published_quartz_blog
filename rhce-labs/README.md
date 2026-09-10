@@ -10,8 +10,12 @@ built, and nothing sends anything anywhere.
 
 ```text
 rhce-labs/
-├── lab-build.sh        build the 3-node KVM/libvirt lab from one RHEL image
-├── lab-destroy.sh      tear it all down again
+├── vagrant/            the Windows/macOS lab
+│   ├── Vagrantfile     three nodes on VirtualBox, disks and spare NIC included
+│   ├── lab.ps1         up / snap / restore / check / break, from PowerShell
+│   └── provision/      what each node needs, and nothing a lab teaches
+├── lab-build.sh        the same lab on KVM/libvirt, from one RHEL image
+├── lab-destroy.sh      tear the KVM one down again
 ├── verify              the check dispatcher — run this
 ├── lib/
 │   ├── verify-lib.sh   the check harness (pass/fail, scoring, reboot proof)
@@ -25,24 +29,43 @@ rhce-labs/
 
 ## Quick start
 
-```bash
+**Windows or macOS — Vagrant + VirtualBox** (the environment this was last built and
+tested on: Vagrant 2.4.9, VirtualBox 7.2.16, Windows 11):
+
+```powershell
 git clone https://github.com/Push1697/published_quartz_blog.git
-cd published_quartz_blog/rhce-labs
+cd published_quartz_blog/rhce-labs/vagrant
 
-# 1. build the lab (on a Fedora/RHEL KVM host — see the guide below)
-./lab-build.sh
+.\lab.ps1 doctor          # is the host fit? RAM, disk, host-only net, hypervisor
+.\lab.ps1 up              # first run downloads a ~1 GB box
+.\lab.ps1 check env rhel-control
+.\lab.ps1 snap clean      # the baseline you will restore to constantly
 
-# 2. confirm it is sound before starting
-sudo ./verify env
-
-# 3. work a lab from its requirements, then grade yourself
-sudo ./verify 2.5
-sudo reboot
-sudo ./verify 2.5 --after-reboot     # the run that actually counts
-
-# 4. once the labs are comfortable, start breaking things
-sudo ./break/break-advanced.sh random --yes
+.\lab.ps1 check 2.5 rhel01               # grade a lab
+.\lab.ps1 break-advanced random rhel01   # then start breaking things
 ```
+
+The kit is mounted read-only inside every node at `/opt/rhce-labs`, so there is
+nothing to copy:
+
+```bash
+vagrant ssh rhel01
+sudo /opt/rhce-labs/verify 2.5
+sudo reboot
+sudo /opt/rhce-labs/verify 2.5 --after-reboot     # the run that counts
+```
+
+**Linux host — KVM/libvirt:**
+
+```bash
+./lab-build.sh                  # three nodes from one RHEL image
+sudo ./verify env
+sudo ./verify 2.5
+```
+
+Both are the same labs. The checkers detect the platform, the blank lab disks
+(`sdb`/`sdc` on VirtualBox, `vdb`/`vdc` on KVM) and the lab network, so no lab
+text depends on which you chose. `verify env` prints what it found.
 
 The written labs — requirements, acceptance criteria and the reasoning behind
 them — are the article series:
@@ -89,7 +112,7 @@ fix it. That part is the lab.
 
 | Checks | Run on | As |
 | --- | --- | --- |
-| `env` | the KVM host **and** the control node | either |
+| `env` | every node — it detects which one it is on | root |
 | `1.x`, `2.x`, `3.x`, `breakfix`, `advanced`, `4.2` | rhel01 | root |
 | `2.7` | rhel01 **and** rhel02 | root |
 | `4.1` | rhel01 | the ordinary user, **not** root |
@@ -149,8 +172,9 @@ plain English, and `reveal` exists so you never need to.
 > The saboteurs are for a throwaway lab VM you can revert. They fill
 > filesystems, move the clock, and disable SELinux until you repair them. They
 > write **no backups** — a snapshot is the intended escape hatch:
-> `virsh snapshot-create-as rhel01 pre-lab`. Never run them on anything you
-> care about.
+> `.\lab.ps1 snap pre-lab rhel01` on Vagrant, or
+> `virsh snapshot-create-as rhel01 pre-lab` on KVM. Never run them on anything
+> you care about.
 
 ## Adding a check
 

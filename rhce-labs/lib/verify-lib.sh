@@ -403,12 +403,94 @@ bool_persist() {
   semanage boolean -l 2>/dev/null | awk -v b="$1" '$1 == b { gsub(/[(),]/, "", $0); print $3 }'
 }
 
+# --------------------------------------------- where is this lab running? ----
+# Where the lab environment made a deliberate choice it records it, so the
+# checkers read a fact instead of inferring one. Anything already set in the
+# environment wins, so a one-off override on the command line still works.
+if [[ -r /etc/rhce-lab.env ]]; then
+  while IFS='=' read -r _k _v; do
+    [[ $_k =~ ^LAB_[A-Z_]+$ ]] || continue
+    [[ -n ${!_k:-} ]] && continue
+    eval "$_k=\$_v"
+  done < /etc/rhce-lab.env
+  unset _k _v
+fi
+# The same labs run on KVM/libvirt (virtio disks: vdb, vdc; a routed lab network
+# with a real gateway) and on Vagrant/VirtualBox (SATA disks: sdb, sdc; a
+# host-only network with no router). Nothing below assumes either.
+
+lab_platform() {   # kvm | virtualbox | unknown
+  [[ -n ${LAB_PLATFORM:-} ]] && { echo "$LAB_PLATFORM"; return 0; }
+  local v
+  v=$(systemd-detect-virt 2>/dev/null || true)
+  case "$v" in
+    kvm|qemu) echo kvm ;;
+    oracle)   echo virtualbox ;;
+    *)        [[ -d /vagrant || -d /opt/rhce-labs ]] && echo virtualbox || echo unknown ;;
+  esac
+}
+
+# The whole disk that carries /. Everything else is a blank lab disk.
+root_disk() {
+  local d
+  for d in $(lsblk -dno NAME,TYPE 2>/dev/null | awk '$2 == "disk" { print $1 }'); do
+    if lsblk -no MOUNTPOINTS "/dev/$d" 2>/dev/null | grep -qx '/'; then echo "$d"; return 0; fi
+    if lsblk -no MOUNTPOINT  "/dev/$d" 2>/dev/null | grep -qx '/'; then echo "$d"; return 0; fi
+  done
+  return 1
+}
+
+# lab_disk 1|2 — the Nth blank lab disk, whatever the hypervisor calls it.
+# Override with LAB_DISK1=/dev/sdb LAB_DISK2=/dev/sdc if detection ever misfires.
+lab_disk() {
+  local n=${1:-1} override rd
+  override=$(eval "printf '%s' \"\${LAB_DISK$n:-}\"")
+  [[ -n ${override:-} ]] && { printf '%s' "$override"; return 0; }
+  rd=$(root_disk || true)
+  lsblk -dno NAME,TYPE 2>/dev/null |
+    awk -v skip="${rd:-__none__}" '$2 == "disk" && $1 != skip { print "/dev/" $1 }' |
+    sed -n "${n}p"
+}
+
+# The lab network prefix, e.g. 192.168.56. Override with LAB_NET.
+lab_net() {
+  [[ -n ${LAB_NET:-} ]] && { printf '%s' "$LAB_NET"; return 0; }
+  local ip
+  # the first RFC1918 address that is not the NAT interface a hypervisor hands out
+  ip=$(ip -4 -o addr show scope global 2>/dev/null |
+       awk '{ print $4 }' | cut -d/ -f1 |
+       grep -vE '^(10\.0\.2\.|127\.)' | head -1)
+  [[ -n ${ip:-} ]] && { printf '%s' "${ip%.*}"; return 0; }
+  printf '%s' "192.168.56"
+}
+
+# The interface Vagrant/libvirt uses for its own management access. The
+# networking lab must not reconfigure it, or you cut off your own session.
+mgmt_iface() {
+  ip -4 -o addr show 2>/dev/null | awk '$4 ~ /^10\.0\.2\./ { print $2; exit }'
+}
+
+# The interface the environment set aside for the networking lab: present, and
+# deliberately left with no address. Recorded by the provisioner where possible,
+# otherwise the first interface that has no IPv4 address at all.
+spare_iface() {
+  [[ -n ${LAB_SPARE_IFACE:-} ]] && { printf '%s' "$LAB_SPARE_IFACE"; return 0; }
+  local i
+  for i in $(ls /sys/class/net 2>/dev/null | grep -Ev '^(lo|virbr|docker)'); do
+    [[ -z $(ip -4 -o addr show dev "$i" 2>/dev/null) ]] && { printf '%s' "$i"; return 0; }
+  done
+  return 1
+}
+
+# The address the environment gave this node before any lab touched it. The
+# networking lab must not steal it.
+primary_lab_ip() { printf '%s' "${LAB_PRIMARY_IP:-}"; }
 # unit_prop <unit> <Property>
 unit_prop() { systemctl show -p "$2" --value "$1" 2>/dev/null; }
 
 # check_sh / check_not_sh run their snippet in a subshell via `bash -c`, so the
 # helpers above have to be exported for those snippets to see them.
-export -f user_exists group_exists group_gid user_shell user_home user_gid           user_uid in_group mode_of perms_of owner_of selinux_type fstab_line           mount_opts mount_src mount_fstype dev_uuid size_gib df_gib approx           bool_persist unit_prop mode_bit group_writable other_writable owner_exec group_exec other_exec sgid_set suid_set sticky_set 2>/dev/null || true
+export -f user_exists group_exists group_gid user_shell user_home user_gid           user_uid in_group mode_of perms_of owner_of selinux_type fstab_line           mount_opts mount_src mount_fstype dev_uuid size_gib df_gib approx           bool_persist unit_prop mode_bit group_writable other_writable owner_exec group_exec other_exec sgid_set suid_set sticky_set lab_platform root_disk lab_disk lab_net mgmt_iface spare_iface primary_lab_ip 2>/dev/null || true
 
 # ------------------------------------------------------------------- summary --
 summary() {

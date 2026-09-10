@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Lab 2.6 — LVM                                     (01-Labs-RHCSA-Foundation)
-# Run on rhel01, as root. Uses /dev/vdc.
+# Run on rhel01, as root. Uses the second blank lab disk (vdc on KVM,
+# sdc on VirtualBox) — detected, not assumed.
 . "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/../lib/verify-lib.sh"
 
 VG=vgdata
+DISK=$(lab_disk 2)
 
 lv_size_gib() { lvs --noheadings --units g -o lv_size "$VG/$1" 2>/dev/null | tr -d ' g'; }
 
@@ -14,11 +16,12 @@ pe_size_is_16m() {
   approx "${pe:-0}" 16 0.5
 }
 
-vg_on_vdc() {
+vg_on_lab_disk() {
   local pvs
   pvs=$(vgs --noheadings -o pv_name "$VG" 2>/dev/null | tr -d ' ' | tr '\n' ' ')
   echo "physical volumes in $VG: ${pvs:-<none>}"
-  grep -q '/dev/vdc' <<<"$pvs"
+  echo "expected the second lab disk: $DISK"
+  grep -q "$DISK" <<<"$pvs"
 }
 
 no_snapshot_left() {
@@ -40,10 +43,16 @@ fs_fills_lv() {   # the filesystem must have been grown, not just the LV
 # ------------------------------------------------------------------------------
 lab_init "2.6" "LVM" --host rhel01 --root "$@"
 
+if [[ -z ${DISK:-} ]]; then
+  fail "a second blank lab disk is attached"     "only one non-root disk was found — the LVM lab needs two"
+  summary; exit 1
+fi
+info "using lab disk: $DISK ($(lab_platform))"
+
 section "1. The volume group"
-check "/dev/vdc is a physical volume" pvs /dev/vdc
+check "$DISK is a physical volume" pvs "$DISK"
 check "volume group $VG exists" vgs "$VG"
-check "it is built on /dev/vdc" vg_on_vdc
+check "it is built on $DISK" vg_on_lab_disk
 check "the extent size is 16 MiB" pe_size_is_16m
 report "the current layout" bash -c 'pvs; vgs; lvs'
 

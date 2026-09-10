@@ -96,7 +96,7 @@ check "2222 is labelled ssh_port_t on every node" \
 section "7. firewalld zones, services, ports and the rich rule"
 check "the rich rule from Lab 3.3 is present" \
   bash -c 'out=$(ansible managed -m shell -a "firewall-cmd --list-rich-rules" --become 2>&1);
-           echo "$out" | tail -6; grep -q "192.168.124.99" <<<"$out"'
+           echo "$out" | tail -6; grep -q "$(lab_net).99" <<<"$out"'
 check "8080/tcp is open" \
   bash -c 'out=$(ansible managed -m shell -a "firewall-cmd --list-ports" --become 2>&1);
            echo "$out" | tail -4; grep -q 8080 <<<"$out"'

@@ -13,8 +13,9 @@ Mock EX200-A — 2.5 hours, closed book, rhel01 reverted to `clean` first.
 Graded after a reboot. The grader pins the values below, so build exactly these.
 
  1. Set the hostname to server-a.lab.local, permanently.
- 2. Configure a static IP on the primary interface with two DNS servers and the
-    search domain lab.local. It must survive a reboot.
+ 2. Configure a static IP with two DNS servers and the search domain lab.local,
+    on a spare interface — never the one your session arrives on. It must
+    survive a reboot, and must not claim the default route.
  3. Group `finance`, GID 6000. Users `fin1` and `fin2` in it. `fin2` must not be
     able to log in interactively.
  4. fin1's password expires in 45 days, with a 10-day warning.
