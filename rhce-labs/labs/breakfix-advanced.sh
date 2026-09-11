@@ -49,7 +49,13 @@ authselect_consistent() {
 # ------------------------------------------------------------------- f2 -------
 no_immutable_configs() {
   local hits
-  hits=$(lsattr -R -a /etc 2>/dev/null | awk '$1 ~ /i/ && $2 !~ /\/\.\.?$/ { print }')
+  # lsattr -R prints a bare "path:" header line for every directory it walks.
+  # Those lines have one field, so the old test `$1 ~ /i/` was matching the
+  # *path* whenever it contained the letter i — /etc/terminfo, /etc/dnf/plugins
+  # and a dozen others were reported as immutable on a completely clean box.
+  # With two fields, $1 really is the attribute string, where i means immutable.
+  hits=$(lsattr -R -a /etc 2>/dev/null |
+         awk 'NF == 2 && $1 ~ /i/ && $2 !~ /[/][.][.]?$/ { print }')
   [[ -z ${hits// /} ]] && return 0
   echo "files under /etc carrying the immutable attribute:"
   echo "$hits" | head -8
@@ -256,6 +262,37 @@ chronyd_running() {
   systemctl is-active --quiet chronyd
 }
 
+# The clock drill no longer moves the wall clock — the hypervisor put that back
+# within seconds. It moves the things RHEL itself owns, so these are what has
+# to be graded.
+timezone_is_sane() {
+  local tz off
+  tz=$(timedatectl show -p Timezone --value 2>/dev/null || cat /etc/timezone 2>/dev/null)
+  off=$(date +%z)
+  echo "timezone: ${tz:-<unknown>} (UTC offset $off)"
+  [[ -n ${tz:-} ]] || return 2
+  # Nothing here is wrong with choosing an unusual zone deliberately — but the
+  # lab is built in UTC, and the drill moves it to one of the extremes.
+  case "$tz" in
+    Pacific/Kiritimati|Pacific/Apia|Pacific/Tongatapu|Etc/GMT-14|America/Adak)
+      echo "this is the timezone the drill sets, not the one the lab was built in"
+      return 1 ;;
+  esac
+  return 0
+}
+
+hwclock_is_utc() {
+  [[ -f /etc/adjtime ]] || { echo "no /etc/adjtime on this system"; return 2; }
+  local mode
+  mode=$(tail -1 /etc/adjtime | tr -d '[:space:]')
+  echo "/etc/adjtime says the hardware clock holds: ${mode:-<nothing>}"
+  if [[ $mode == LOCAL ]]; then
+    echo "so the clock will shift by the timezone offset at the next boot"
+    return 1
+  fi
+  return 0
+}
+
 no_future_dated_files() {
   local n
   n=$(find /etc /root -xdev -newermt "+1 hour" 2>/dev/null | grep -c .)
@@ -350,21 +387,44 @@ no_relabel_pending() {
 }
 
 # ------------------------------------------------------------------- f9 -------
+_in_list() {   # _in_list <needle> <haystack words...>
+  local n=$1; shift
+  local x; for x in "$@"; do [[ $x == "$n" ]] && return 0; done
+  return 1
+}
+
 resolv_conf_matches_profile() {
   command -v nmcli >/dev/null 2>&1 || return 2
-  local con prof live bad=0 s
-  con=$(nmcli -t -f NAME con show --active 2>/dev/null | head -1)
-  [[ -n ${con:-} ]] || { echo "no active connection profile"; return 2; }
-  prof=$(nmcli -g ipv4.dns con show "$con" 2>/dev/null | tr ',' ' ')
+  local live nm bad=0 s c
+
+  # What NetworkManager would put in the file: every *active* profile, and its
+  # applied servers, not just a statically configured ipv4.dns.
+  #
+  # The old version read ipv4.dns off whichever profile happened to sort first
+  # and failed if it was empty. On this lab that is the NAT connection, which
+  # takes its DNS from a DHCP lease — perfectly reproducible, and reported as
+  # "not reproducible" on a completely clean box. It also never looked at IPv6.
+  nm=$(nmcli -t -f NAME con show --active 2>/dev/null |
+       while read -r c; do
+         [[ -n ${c// /} ]] || continue
+         nmcli -g IP4.DNS,IP6.DNS   con show "$c" 2>/dev/null | tr ',|' '  '
+         nmcli -g ipv4.dns,ipv6.dns con show "$c" 2>/dev/null | tr ',|' '  '
+       # nmcli -g escapes the colons in an IPv6 address as \:, so strip
+       # the backslashes or every v6 nameserver compares as different.
+       done | tr -d '\134' | tr -s ' \n' ' ')
   live=$(awk '/^nameserver/ { print $2 }' /etc/resolv.conf 2>/dev/null | tr '\n' ' ')
-  echo "profile '$con' ipv4.dns: ${prof:-<none>}"
-  echo "/etc/resolv.conf:        ${live:-<none>}"
-  [[ -n ${prof// /} ]] || { echo "the profile carries no DNS server, so resolv.conf is not reproducible"; return 1; }
-  for s in $prof; do
-    grep -qw "$s" <<<"$live" || { echo "  $s is in the profile but not in resolv.conf — the file will change on the next connection up"; bad=1; }
-  done
+
+  echo "NetworkManager would write: ${nm:-<none>}"
+  echo "/etc/resolv.conf has:       ${live:-<none>}"
+  [[ -n ${live// /} ]] || { echo "resolv.conf names no server at all"; return 1; }
+
   for s in $live; do
-    grep -qw "$s" <<<"$prof" || { echo "  $s is in resolv.conf but not in the profile — it was hand-edited and will be overwritten"; bad=1; }
+    _in_list "$s" $nm ||
+      { echo "  $s is in resolv.conf but no active profile knows it — hand-edited, and it will be overwritten"; bad=1; }
+  done
+  for s in $nm; do
+    _in_list "$s" $live ||
+      { echo "  $s is configured but missing from resolv.conf — the file will change when the connection next comes up"; bad=1; }
   done
   return $bad
 }
@@ -517,6 +577,18 @@ if want f6; then
     *) fail "the clock is consistent with what is installed on the box" "see above" ;;
   esac
   check -p "time synchronisation is configured and on" time_sync_configured
+  timezone_is_sane; rc=$?
+  case $rc in
+    0) pass "the timezone is the one this lab is built in" ;;
+    2) skipped "the timezone" "could not read it" ;;
+    *) fail "the timezone is the one this lab is built in"          "every log timestamp and every wall-clock timer is offset by this" ;;
+  esac
+  hwclock_is_utc; rc=$?
+  case $rc in
+    0) pass "the hardware clock is read as UTC, so a reboot does not shift it" ;;
+    2) skipped "how the hardware clock is read" "no /etc/adjtime" ;;
+    *) fail "the hardware clock is read as UTC, so a reboot does not shift it"          "this one is invisible until you reboot — which is the point of it" ;;
+  esac
   chronyd_running; rc=$?
   case $rc in
     0) pass "chronyd is running" ;;

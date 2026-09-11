@@ -319,7 +319,13 @@ try {
         }
         Write-Host ''
         Write-Host 'Building Quartz...' -ForegroundColor Cyan
-        & npm --prefix $quartzRoot run quartz -- build
+        # Not `npm run quartz`: that script is "./quartz/bootstrap-cli.mjs",
+        # a shebang path cmd.exe cannot execute, so on Windows it fails with
+        # "'.' is not recognized as an internal or external command" every time.
+        # Invoking it through node works on every platform.
+        Push-Location $quartzRoot
+        try   { & node './quartz/bootstrap-cli.mjs' build }
+        finally { Pop-Location }
         if ($LASTEXITCODE -ne 0) { throw "Quartz build failed with exit code $LASTEXITCODE" }
     }
 

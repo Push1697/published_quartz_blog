@@ -19,20 +19,27 @@ param(
     [Parameter(Position = 0)]
     [ValidateSet('up', 'status', 'ssh', 'halt', 'destroy', 'reload', 'provision',
                  'snap', 'restore', 'snaps', 'check', 'break', 'break-advanced',
-                 'reveal', 'doctor', 'help')]
+                 'reveal', 'doctor', 'help',
+                 'incident', 'objective', 'sla', 'grade', 'abandon')]
     [string]$Command = 'help',
 
     [Parameter(Position = 1, ValueFromRemainingArguments = $true)]
-    [string[]]$Rest
+    [string[]]$Rest,
+
+    # exam conditions: no diagnostics on failure, warnings count as failures,
+    # tighter tolerances, and a pass requires proof it survived a reboot
+    [switch]$Hard,
+    [switch]$Blind
 )
 
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
 
 $Nodes = @('rhel-control', 'rhel01', 'rhel02')
-# `config.vm.disk` for VirtualBox wants this on some Vagrant builds and ignores
-# it on the rest, so setting it is free insurance for the blank lab disks.
-$env:VAGRANT_EXPERIMENTAL = 'disks'
+# The blank lab disks are created and attached by the Vagrantfile itself, not
+# by `config.vm.disk`, because Vagrant's disk reconciliation cannot survive a
+# `vagrant snapshot restore` — see section 4 of 00-Lab-Environment. So
+# VAGRANT_EXPERIMENTAL is no longer needed, and is left unset deliberately.
 
 function Invoke-Vagrant { & vagrant @args; if ($LASTEXITCODE -ne 0) { throw "vagrant $($args -join ' ') failed ($LASTEXITCODE)" } }
 function Info($m) { Write-Host $m -ForegroundColor Cyan }
@@ -63,12 +70,26 @@ lab.ps1 — the three-node RHCSA/RHCE lab on Vagrant + VirtualBox
                            inject one of the ten harder faults
   reveal [node]            what the advanced saboteur did, and how long you took
 
+  incident <1-4> [node]    open an INCIDENT: several faults at once, a work order,
+                           and a clock. Level 4 fights back.
+  objective [node]         re-print the work order
+  sla [node]               how long the incident has been open
+  grade [node]             grade the incident (add -Hard for exam conditions)
+  abandon [node]           surrender: stop the persistence, then reveal
+
   doctor                   check the host is fit to run the lab
 
 The first `up` downloads a ~1 GB box, so it takes a while. After that a full
 rebuild is a couple of minutes.
 
 Before Week 1:   .\lab.ps1 up ; .\lab.ps1 check env rhel-control ; .\lab.ps1 snap clean
+
+Incident drill:  .\lab.ps1 snap pre-incident
+                 .\lab.ps1 incident 3
+                 .\lab.ps1 objective        # what was reported
+                 ... diagnose, repair, REBOOT ...
+                 .\lab.ps1 grade            # or: grade -Hard
+                 .\lab.ps1 reveal
 "@
 }
 
@@ -125,7 +146,10 @@ switch ($Command) {
         $node = if ($Rest.Count -gt 1) { $Rest[1] } else { 'rhel01' }
         # 4.1 is the rootless-container lab: it must NOT run as root.
         $asRoot = ($lab -ne '4.1')
-        $inner = if ($asRoot) { "sudo /opt/rhce-labs/verify $lab" } else { "/opt/rhce-labs/verify $lab" }
+        $extra = ''
+        if ($Hard)  { $extra += ' --hard' }
+        if ($Blind) { $extra += ' --blind' }
+        $inner = if ($asRoot) { "sudo /opt/rhce-labs/verify $lab$extra" } else { "/opt/rhce-labs/verify $lab$extra" }
         Info "$node : $inner"
         & vagrant ssh $node -c $inner
     }
@@ -147,6 +171,29 @@ switch ($Command) {
     'reveal' {
         $node = Resolve-Node $Rest
         & vagrant ssh $node -c "sudo /opt/rhce-labs/break/break-advanced.sh reveal"
+    }
+
+    'incident' {
+        $lvl = Resolve-Node $Rest 0 '2'
+        $node = if ($Rest.Count -gt 1) { $Rest[1] } else { 'rhel01' }
+        Warn "Snapshot first — there is no undo:  .\lab.ps1 snap pre-incident"
+        Info "Opening a severity-$lvl incident on $node"
+        & vagrant ssh $node -c "sudo /opt/rhce-labs/break/incident.sh open $lvl --yes"
+        Ok  "`nWork order:  .\lab.ps1 objective $node"
+        Warn "Some of it only shows after a reboot. Reboot before you start."
+    }
+
+    'objective' { & vagrant ssh (Resolve-Node $Rest) -c "sudo /opt/rhce-labs/break/incident.sh objective" }
+    'sla'       { & vagrant ssh (Resolve-Node $Rest) -c "sudo /opt/rhce-labs/break/incident.sh status" }
+    'abandon'   { & vagrant ssh (Resolve-Node $Rest) -c "sudo /opt/rhce-labs/break/incident.sh abandon --yes" }
+
+    'grade' {
+        $node = Resolve-Node $Rest
+        $flags = ''
+        if ($Hard)  { $flags += ' --hard' }
+        if ($Blind) { $flags += ' --blind' }
+        Info "$node : verify incident$flags"
+        & vagrant ssh $node -c "sudo /opt/rhce-labs/verify incident$flags"
     }
 
     'doctor' {

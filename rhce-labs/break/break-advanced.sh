@@ -181,14 +181,27 @@ DROPIN
 }
 
 fault_f5() {
-  local avail want ghost
+  local avail total keep want ghost
   avail=$(df -BM --output=avail /var 2>/dev/null | tail -1 | tr -dc '0-9')
-  [[ -n ${avail:-} ]] || return 1
-  want=$((avail - 250))
-  ((want > 2048)) && want=2048
+  total=$(df -BM --output=size  /var 2>/dev/null | tail -1 | tr -dc '0-9')
+  [[ -n ${avail:-} && -n ${total:-} ]] || return 1
+
+  # Fill it until df genuinely reads full. A fixed 2 GB ceiling left a 19 GB
+  # root at 19% used, so the reported symptom — a full filesystem — was simply
+  # not there, and the checker's own "over 90% full" test never fired.
+  # Keep a working margin so the box stays diagnosable: the repair is to find
+  # and kill the process holding the descriptor, which needs no free space.
+  keep=$((total / 33)); ((keep < 500)) && keep=500
+  want=$((avail - keep))
   ((want < 64)) && { echo "  (not enough free space to stage this one safely)" >&2; return 1; }
+
   ghost=$(mktemp /var/tmp/.stage-XXXXXX) || return 1
-  dd if=/dev/zero of="$ghost" bs=1M count="$want" status=none 2>/dev/null || true
+  # fallocate reserves the extents without writing them: instant, and it does
+  # not inflate the hypervisor's dynamically-allocated disk image with several
+  # gigabytes of zeros the way dd would.
+  fallocate -l "${want}M" "$ghost" 2>/dev/null ||
+    dd if=/dev/zero of="$ghost" bs=1M count="$want" status=none 2>/dev/null ||
+    { rm -f "$ghost"; return 1; }
   # Hold the descriptor open, then unlink. The blocks stay allocated.
   setsid nohup bash -c 'exec 3<"$1"; rm -f -- "$1"; exec sleep 86400' _ "$ghost" \
     >/dev/null 2>&1 &
@@ -197,19 +210,75 @@ fault_f5() {
 }
 
 fault_f6() {
-  timedatectl set-ntp false >/dev/null 2>&1 || true
-  systemctl stop chronyd >/dev/null 2>&1 || true
-  local future
-  future=$(date -d '+287 days' '+%Y-%m-%d %H:%M:%S' 2>/dev/null) || return 1
-  timedatectl set-time "$future" >/dev/null 2>&1 || date -s "$future" >/dev/null 2>&1 || return 1
+  # Four independent time faults, none of which the hypervisor can undo.
+  #
+  # An earlier version simply pushed the wall clock forward. On VirtualBox the
+  # guest additions resynchronise the clock from the host within seconds, so
+  # the fault was gone before it could be looked at; and stopping them makes
+  # VBoxService log a timesync error to the console every ten seconds, which is
+  # a permanent red herring on a box meant for troubleshooting practice.
+  # These four persist on any hypervisor and on bare metal, and every one of
+  # them is a knob RHEL actually gives you.
+  local did=0
+
+  # 1. the time service, off and staying off
+  timedatectl set-ntp false >/dev/null 2>&1 && did=1
+  systemctl disable --now chronyd >/dev/null 2>&1 && did=1
+
+  # 2. a timezone half a world away — every log timestamp and every timer that
+  #    fires on a wall-clock time is now wrong, and `date` looks fine locally
+  if command -v timedatectl >/dev/null 2>&1; then
+    timedatectl set-timezone Pacific/Kiritimati >/dev/null 2>&1 && did=1
+  fi
+
+  # 3. tell the system the hardware clock holds local time, not UTC. The
+  #    running clock is untouched, so this is invisible until the next boot,
+  #    when it shifts by the timezone offset.
+  if [[ -f /etc/adjtime ]]; then
+    sed -i 's/^UTC$/LOCAL/' /etc/adjtime 2>/dev/null && did=1
+  else
+    printf '0.0 0 0.0\n0\nLOCAL\n' > /etc/adjtime 2>/dev/null && did=1
+  fi
+
+  # 4. files dated in the future, which is what makes this hard to unsee: make,
+  #    dnf and anything using `find -newer` now disagree with reality.
+  local f
+  for f in /etc/hosts /etc/motd; do
+    [[ -e $f ]] && touch -d '+40 days' "$f" 2>/dev/null && did=1
+  done
+
+  ((did))
 }
 
 fault_f7() {
   sed -i -E 's|^([[:space:]]*Defaults[[:space:]]+secure_path[[:space:]]*=[[:space:]]*).*|\1/usr/local/bin:/usr/bin|' \
     /etc/sudoers
-  local f
-  f=$(find /etc/sudoers.d -maxdepth 1 -type f ! -name 'README' -print -quit 2>/dev/null)
-  [[ -n ${f:-} ]] && chmod 0666 "$f"
+
+  # Make a sudoers.d file world-writable so sudo refuses to read it — but never
+  # the file that grants the lab account its own access. On a Vagrant box that
+  # is /etc/sudoers.d/vagrant, and breaking it would lock you out of root with
+  # no way back except the snapshot. A drill should be hard, not unrecoverable.
+  local me groups f target=""
+  me=${SUDO_USER:-$(awk -F: '$3 >= 1000 && $3 < 65534 && $6 ~ /^\/home\// { print $1; exit }' /etc/passwd)}
+  groups=$(id -nG "$me" 2>/dev/null | tr ' ' '|')
+  for f in /etc/sudoers.d/*; do
+    [[ -f $f ]] || continue
+    [[ $(basename "$f") == README ]] && continue
+    grep -qE "(^|[[:space:]%])(${me}|${groups:-__none__})([[:space:]]|$)" "$f" && continue
+    target=$f
+    break
+  done
+
+  # Nothing safe to break? Then create the rule the labs create anyway, and
+  # break that instead.
+  if [[ -z ${target:-} ]]; then
+    getent group developers >/dev/null 2>&1 || groupadd developers 2>/dev/null
+    printf '%%developers ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart httpd, /usr/bin/systemctl status httpd\n' \
+      > /etc/sudoers.d/developers
+    chmod 0440 /etc/sudoers.d/developers
+    target=/etc/sudoers.d/developers
+  fi
+  chmod 0666 "$target"
   return 0
 }
 

@@ -34,6 +34,39 @@ KEY_DIR   = File.join(HERE, "keys")
 KEY_FILE  = File.join(KEY_DIR, "lab_ed25519")
 DISK_DIR  = File.join(HERE, "disks")
 
+# --- where the extra lab disks live, and whether they are already attached ---
+# The blank disks are attached by hand rather than with `config.vm.disk`.
+# Vagrant's experimental disk support reconciles disks on every `up` and
+# `reload` by the *filename* of the medium currently attached. A
+# `vagrant snapshot restore` swaps that medium for the snapshot's differencing
+# image, whose filename is `{uuid}.vdi`, so the reconciliation cannot find
+# "rhel01-lab1", decides the disk is missing, and aborts trying to create a VDI
+# that already exists — leaving the machine powered off and `vagrant up`
+# broken until you hand-edit .vagrant/machines/*/virtualbox/disk_meta.
+#
+# Snapshots are mandatory before every break-fix drill in this project, so that
+# collision is not an edge case here; it is the normal path. Attaching the
+# disks directly costs a few lines and makes the two features coexist.
+VBOXMANAGE = ENV.fetch("VBOXMANAGE") do
+  ["C:/Program Files/Oracle/VirtualBox/VBoxManage.exe",
+   "/usr/bin/VBoxManage", "/usr/local/bin/VBoxManage"].find { |c| File.exist?(c) } ||
+    "VBoxManage"
+end
+VM_DIR = ENV.fetch("LAB_VM_DIR") do
+  out = `"#{VBOXMANAGE}" list systemproperties 2>#{File::NULL}`
+  (out[/^Default machine folder:\s*(.+)$/, 1] || "").strip
+end
+
+# Is something already attached at this SATA port? If so, leave it alone: after
+# a snapshot restore it is the differencing image, and forcing the base medium
+# back would break the snapshot chain.
+def lab_disk_attached?(vm_name, port)
+  out = `"#{VBOXMANAGE}" showvminfo #{vm_name} --machinereadable 2>#{File::NULL}`
+  return false if out.empty?
+  m = out[/^"SATA-#{port}-0"="(.*)"$/, 1]
+  !m.nil? && m != "none"
+end
+
 # name, ip, memory, cpus, blank disks, spare NIC for the nmcli lab
 NODES = [
   { name: "rhel-control", ip: "#{NET}.10", mem: 2048, cpus: 2, disks: 0, spare_nic: false },
@@ -107,13 +140,39 @@ Vagrant.configure("2") do |config|
         # cost about 2 GB each, which is the right trade for booting at all.
         vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
         vb.customize ["modifyvm", :id, "--audio-driver", "none"]
+
+        # Note on the clock: the guest additions resynchronise it from the host
+        # every few seconds, so a fault that only moves the wall clock does not
+        # survive. Turning that off (GetHostTimeDisabled) works, but VBoxService
+        # then logs "timesync Error: VbglR3GetHostTime failed" to the console
+        # every ten seconds and journald rotates on every jump — a permanent red
+        # herring on a box built for troubleshooting practice. So host sync
+        # stays on, and the clock drill uses knobs the hypervisor has no opinion
+        # about: the time service, the timezone, /etc/adjtime, and file dates.
       end
 
       # Blank disks for the partition, swap and LVM labs. VirtualBox presents
       # them as /dev/sdb and /dev/sdc, where KVM would give vdb and vdc — the
       # checkers detect this rather than assuming.
-      node[:disks].times do |i|
-        vm.vm.disk :disk, size: "#{DISK_MB}MB", name: "#{node[:name]}-lab#{i + 1}"
+      #
+      # Attached here rather than with `config.vm.disk` so that snapshots keep
+      # working — see the note by lab_disk_attached? above. This also means
+      # VAGRANT_EXPERIMENTAL=disks is no longer needed.
+      if node[:disks] > 0
+        vm.vm.provider "virtualbox" do |vb|
+          node[:disks].times do |i|
+            port = i + 1
+            vdi  = File.join(VM_DIR, node[:name], "#{node[:name]}-lab#{port}.vdi")
+            next if lab_disk_attached?(node[:name], port)
+            unless File.exist?(vdi)
+              vb.customize ["createmedium", "disk", "--filename", vdi,
+                            "--size", DISK_MB, "--format", "VDI"]
+            end
+            vb.customize ["storageattach", :id, "--storagectl", "SATA",
+                          "--port", port.to_s, "--device", "0",
+                          "--type", "hdd", "--medium", vdi]
+          end
+        end
       end
 
       if node[:name] == "rhel-control" && SYNC_ANSIBLE
@@ -128,6 +187,7 @@ Vagrant.configure("2") do |config|
                       name: "common",
                       env: { "HOSTS_BLOCK"    => HOSTS_BLOCK,
                              "LAB_PUBKEY"     => LAB_PUBKEY,
+                             "LAB_PRIVKEY"    => LAB_PRIVKEY,
                              "LAB_IP"         => node[:ip],
                              "LAB_NET_PREFIX" => NET,
                              "LAB_SPARE"      => node[:spare_nic] ? "1" : "0" },

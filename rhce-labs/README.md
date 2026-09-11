@@ -1,139 +1,43 @@
-# RHCSA → RHCE lab kit
+# Lab verification scripts
 
-Everything needed to run the lab curriculum published at
-<https://learning.overflowbyte.cloud>: build a three-node RHEL lab, work through
-the labs, have a script grade your work, then have a different script break the
-machine so you can practise repairing it.
+Offline check scripts for every lab in this project. They read the state of the
+machine and tell you whether the lab's **acceptance criteria** are actually met —
+after the reboot, which is how both exams are graded.
 
-Bash and coreutils only. Nothing here needs network access once the lab is
-built, and nothing sends anything anywhere.
+No network, no packages to install, no internet access needed. Bash and
+coreutils only.
 
-```text
-rhce-labs/
-├── vagrant/            the Windows/macOS lab
-│   ├── Vagrantfile     three nodes on VirtualBox, disks and spare NIC included
-│   ├── lab.ps1         up / snap / restore / check / break, from PowerShell
-│   └── provision/      what each node needs, and nothing a lab teaches
-├── lab-build.sh        the same lab on KVM/libvirt, from one RHEL image
-├── lab-destroy.sh      tear the KVM one down again
-├── verify              the check dispatcher — run this
-├── lib/
-│   ├── verify-lib.sh   the check harness (pass/fail, scoring, reboot proof)
-│   └── ansible-lib.sh  additions for the Ansible labs
-├── labs/               one checker per lab, plus the mock graders
-└── break/
-    ├── break.sh            ten single-cause faults, for the first drills
-    ├── break-advanced.sh   ten harder faults — DO NOT READ IT
-    └── break-ansible.sh    corrupts an Ansible project instead of a host
-```
+> They report **what** is wrong, never **how** to fix it. Working that out is the
+> lab. Read only the *Requirement* in the note, build it, then run the checker.
 
-## Quick start
+The same scripts run on Vagrant/VirtualBox and on KVM/libvirt. They detect the
+platform, the blank lab disks (`sdb`/`sdc` versus `vdb`/`vdc`) and the lab
+network rather than assuming any of them, and read
+`/etc/rhce-lab.env` where the environment recorded a deliberate choice.
+`verify env` prints what it found.
 
-**Windows or macOS — Vagrant + VirtualBox** (the environment this was last built and
-tested on: Vagrant 2.4.9, VirtualBox 7.2.16, Windows 11):
+## Getting them onto the lab machines
+
+**On Vagrant/VirtualBox there is nothing to copy.** `vagrant/Vagrantfile` mounts
+this whole directory into every node, read-only, at `/opt/rhce-labs`:
 
 ```powershell
-git clone https://github.com/Push1697/published_quartz_blog.git
-cd published_quartz_blog/rhce-labs/vagrant
-
-.\lab.ps1 doctor          # is the host fit? RAM, disk, host-only net, hypervisor
-.\lab.ps1 up              # first run downloads a ~1 GB box
-.\lab.ps1 check env rhel-control
-.\lab.ps1 snap clean      # the baseline you will restore to constantly
-
-.\lab.ps1 check 2.5 rhel01               # grade a lab
-.\lab.ps1 break-advanced random rhel01   # then start breaking things
+cd vagrant
+.\lab.ps1 up
+.\lab.ps1 check 2.5 rhel01           # drive it from Windows
 ```
 
-The kit is mounted read-only inside every node at `/opt/rhce-labs`, so there is
-nothing to copy:
-
 ```bash
-vagrant ssh rhel01
+# or from inside a node
 sudo /opt/rhce-labs/verify 2.5
-sudo reboot
-sudo /opt/rhce-labs/verify 2.5 --after-reboot     # the run that counts
 ```
 
-**Linux host — KVM/libvirt:**
+Read-only is deliberate: a lab mistake inside a VM can never reach this copy.
+It also means `./verify bundle` cannot write here — and does not need to.
 
-```bash
-./lab-build.sh                  # three nodes from one RHEL image
-sudo ./verify env
-sudo ./verify 2.5
-```
-
-Both are the same labs. The checkers detect the platform, the blank lab disks
-(`sdb`/`sdc` on VirtualBox, `vdb`/`vdc` on KVM) and the lab network, so no lab
-text depends on which you chose. `verify env` prints what it found.
-
-The written labs — requirements, acceptance criteria and the reasoning behind
-them — are the article series:
-
-- [A 60-day RHCSA → RHCE lab curriculum](https://learning.overflowbyte.cloud/blog/rhcsa-to-rhce-a-60-day-lab-curriculum)
-- [Building a three-node RHEL lab on KVM](https://learning.overflowbyte.cloud/blog/building-a-three-node-rhel-lab-on-kvm)
-- [Verifying your own labs offline](https://learning.overflowbyte.cloud/blog/verifying-your-own-labs-offline)
-- [Ten advanced RHEL break-fix drills](https://learning.overflowbyte.cloud/blog/ten-advanced-rhel-break-fix-drills)
-
-## Using the checkers
-
-```bash
-./verify                       # list every check and group
-./verify 1.2                   # one lab
-./verify week1                 # a whole week, in order
-./verify breakfix              # after every break.sh drill
-./verify advanced              # the ten advanced drills
-./verify advanced --blind      # pass/fail only, without saying what was checked
-./verify ex200-a --spec        # print a mock exam paper
-./verify history               # what has been run on this machine
-./verify bundle                # self-contained single-file copies, for transfer
-```
-
-Anything after the name is passed to the checker:
-
-| Flag | Effect |
-| --- | --- |
-| `-v` | show command output for passing checks too, not just failures |
-| `--no-mutate` | skip checks that create or delete anything on the box |
-| `--after-reboot` | refuse to run unless the machine booted in the last 30 min |
-| `--blind` | report pass/fail only, without naming what was checked |
-| `--no-color` | plain output (`NO_COLOR=1` works too) |
-| `--spec` | mocks only — print the exam paper with every value pinned |
-| `--only=fN` | `advanced` only — check a single drill |
-| `--proj=PATH` | Ansible labs — the project directory, default `~/ansible` |
-
-Exit status is 0 when every automated check passed, 1 when something failed, and
-2 when the script refused to run (wrong user, no reboot, no project directory).
-
-They report **what** is unmet and what the machine actually said — never how to
-fix it. That part is the lab.
-
-## Where to run each one
-
-| Checks | Run on | As |
-| --- | --- | --- |
-| `env` | every node — it detects which one it is on | root |
-| `1.x`, `2.x`, `3.x`, `breakfix`, `advanced`, `4.2` | rhel01 | root |
-| `2.7` | rhel01 **and** rhel02 | root |
-| `4.1` | rhel01 | the ordinary user, **not** root |
-| `ex200-a`, `ex200-b` | rhel01 | root |
-| `5.x`, `6.x`, `7.x`, `s1`–`s5`, `ex294-a` | the control node | the ordinary user |
-
-## The reboot rule
-
-Red Hat exams grade the state of the machine **after a reboot**, so these
-checkers do too. Checks marked `[P]` are the ones that classically disappear on
-restart — a `setsebool` without `-P`, a runtime-only firewall rule, a service
-started but never enabled.
-
-The harness records the boot ID on every clean pass. Run a lab again after a
-reboot and the summary says **reboot-proven** instead of *passed on the same
-boot*. That distinction is the difference between full marks and zero.
-
-## Getting them onto a node with no network
-
-`./verify bundle` writes `dist/`, one self-contained file per checker with the
-harness embedded, so a single `scp` moves a single check:
+**For any node you only have `scp` to** (a KVM lab, a remote box), the bundle
+path still works. Each file in `dist/` embeds the harness, so one file is one
+complete checker:
 
 ```bash
 ./verify bundle
@@ -141,40 +45,182 @@ scp dist/lab-2.5.sh user@rhel01:
 ssh user@rhel01 'sudo ./lab-2.5.sh'
 ```
 
-Or the whole set: `tar czf verify.tgz dist && scp verify.tgz user@rhel01:`.
+If a shell complains about `\r`, the files reached the guest with CRLF endings;
+`.gitattributes` pins `*.sh eol=lf`, so check your git config did not override it.
 
-If a shell complains about `\r`, the files were converted to CRLF in transit:
-`sed -i 's/\r$//' *.sh`.
-
-## The saboteurs
-
-`break/break.sh` injects one of ten single-cause faults — a broken fstab entry, a
-mislabelled document root, a removed firewall rule. Repair, then run
-`./verify breakfix`, which has one section per fault so a second fault you did
-not notice shows up immediately.
-
-`break/break-advanced.sh` is the harder set: faults that stay silent until a
-reboot, one symptom with three independent causes, and two that present as
-permissions problems that are not. It deliberately tells you nothing —
+## Using them
 
 ```bash
-sudo ./break/break-advanced.sh list          # the ten symptoms, no spoilers
-sudo ./break/break-advanced.sh random --yes  # one unknown fault
-# ... repair, reboot, repair ...
-sudo ./verify advanced --blind               # am I done yet?
-sudo ./break/break-advanced.sh reveal        # the cause, and your elapsed time
+./verify                       # list every check and group
+./verify 1.2                   # one lab
+./verify week1                 # a whole week, in order
+./verify breakfix              # after every break.sh drill
+./verify advanced              # the ten advanced drills
+./verify advanced --only=f4    # just one of them
+./verify incident              # grade a whole incident against its work order
+./verify incident --hard       # no diagnostics, warnings are failures
+./verify ex200-a --spec        # print a mock's exam paper
+./verify history               # what has been run on this machine
 ```
 
-**Do not read `break-advanced.sh`.** It states the cause of all ten drills in
-plain English, and `reveal` exists so you never need to.
+Anything after the name is passed to the lab script:
 
-> [!warning]
-> The saboteurs are for a throwaway lab VM you can revert. They fill
-> filesystems, move the clock, and disable SELinux until you repair them. They
-> write **no backups** — a snapshot is the intended escape hatch:
-> `.\lab.ps1 snap pre-lab rhel01` on Vagrant, or
-> `virsh snapshot-create-as rhel01 pre-lab` on KVM. Never run them on anything
-> you care about.
+| Flag | Effect |
+| --- | --- |
+| `-v` | show command output for passing checks too, not just failures |
+| `--no-mutate` | skip checks that create or delete anything on the box |
+| `--after-reboot` | refuse to run unless the machine booted in the last 30 min |
+| `--hard` | no diagnostics, warnings become failures, tolerances halve, success needs a reboot |
+| `--no-color` | plain output (`NO_COLOR=1` works too) |
+| `--spec` | mocks only — print the exam paper with pinned values |
+| `--proj=PATH` | Ansible labs — the project directory, default `~/ansible` |
+| `--blind` | report pass/fail only, without saying what was checked |
+
+Exit status is 0 when every automated check passed, 1 when something failed,
+2 when the script refused to run (wrong user, no reboot, no project directory).
+
+## Where to run each one
+
+| Labs | Run on | As |
+| --- | --- | --- |
+| `env` | every node — it detects which one it is on | root |
+| 1.x, 2.x, 3.x, `breakfix`, `advanced`, 4.2 | rhel01 | root |
+| 2.7 | rhel01 **and** rhel02 | root |
+| 4.1 | rhel01 | the ordinary user, **not** root |
+| `ex200-a`, `ex200-b` | rhel01 | root |
+| 5.x, 6.x, 7.x, `s1`–`s5`, `ex294-a` | rhel-control | the ordinary user |
+
+## The reboot rule
+
+Checks marked `[P]` are the ones that classically disappear on restart — a
+`setsebool` without `-P`, a runtime-only firewall rule, a service that was
+started but never enabled.
+
+The harness records the boot ID on every clean pass. Run a lab again after
+`sudo reboot` and the summary says **reboot-proven** instead of *passed on the
+same boot*. That distinction is the difference between full marks and zero.
+
+```bash
+sudo ./verify 2.5        # passes
+sudo reboot
+sudo ./verify 2.5 --after-reboot   # this is the run that counts
+```
+
+## What a script will not grade
+
+Some acceptance criteria are about judgement or about something transient. Those
+appear as `[CHECK]` lines with a note, and they are counted separately from
+passes and failures — for example "you can explain why XFS cannot shrink", or
+"you reset the root password from the GRUB prompt". Be honest with those; they
+are usually the ones that matter.
+
+## The mock graders
+
+`ex200-a`, `ex200-b` and `ex294-a` run one section per exam task and score
+**tasks fully correct**, scaled to 300 with the real 210 pass mark. A task with
+one failed check scores nothing for that task, which is how Red Hat grades.
+
+Their `--spec` output is the exam paper, with every ambiguous value pinned
+(usernames, UIDs, sizes, ports), so the grader is deterministic. Print the spec,
+build it, reboot, then grade:
+
+```bash
+./verify ex200-b --spec > /tmp/paper.txt
+# ... 2.5 hours ...
+sudo reboot
+sudo ./verify ex200-b --after-reboot
+```
+
+Mock EX200-C is EX200-B on a box you first wrecked with `break.sh all`: grade it
+with `ex200-b` plus `breakfix`. Mock EX294-B is EX294-A on a wrecked estate:
+grade it with `ex294-a`.
+
+## Month 2: the Month 1 checks, run remotely
+
+Week 6 re-does the RHCSA labs through Ansible, so the Week 1–3 check scripts
+grade it. `lab-6.1.sh` and friends bundle the relevant Month 1 script, ship it to
+the managed node with the `script` module and run it there — from the control
+node, without logging in, which is the rule for that week.
+
+## The advanced drills
+
+`break/break-advanced.sh` stages ten harder faults — silent until a reboot, or
+with several causes behind one symptom. It names nothing: `list` prints only the
+symptoms, `status` says how many are pending, and `reveal` gives you the cause
+and your elapsed time once you are finished. `./verify advanced` checks all ten
+domains; `--only=fN` checks one. Requirements are in
+`10-Advanced-Breakfix-Labs.md`.
+
+Do not read `break/break-advanced.sh`. It contains every answer in plain
+English, and `reveal` exists so you never have to.
+
+The check descriptions in `./verify advanced` name the domain they examine, so
+running it before you have diagnosed anything narrows the hunt for you. Use
+`--blind` while you are still working — it reports pass/fail per check and
+nothing else:
+
+```bash
+sudo ./verify advanced --blind     # am I done yet?
+sudo ./verify advanced             # what is still wrong (after you have tried)
+```
+
+## Incidents
+
+`break/incident.sh` is the same fault library, delivered as a **work order**
+instead of a drill. `open <1-4>` stages several non-overlapping faults across
+the estate, writes `/root/INCIDENT.md` describing only what a user would have
+reported, and starts a clock. At severity 3 and above one fault lands on rhel02;
+at severity 4 something on the box re-applies a fault every few minutes until
+you find and delete it, and one report is a decoy.
+
+```bash
+sudo ./break/incident.sh open 3 --yes   # snapshot FIRST — there is no undo
+sudo ./break/incident.sh objective      # re-print the work order
+sudo ./break/incident.sh status         # elapsed against the target
+sudo ./verify incident --blind          # am I there yet?
+sudo ./verify incident                  # what is still wrong
+sudo ./break/incident.sh reveal         # the causes, and your time
+sudo ./break/incident.sh abandon --yes  # surrender: reveal, and drop the persistence
+```
+
+`./verify incident` aggregates both health sweeps into one verdict each, times
+you against the work order's target, and fails a repair that was bought with a
+security control (SELinux off in any of its three places, a widened permission,
+a generated policy module) or left its persistence behind. Requirements are in
+`11-Incident-Drills.md`.
+
+Do not read `break/incident.sh` either. Its first lines say so, and `reveal`
+exists so you never have to.
+
+## Layout
+
+```text
+verify/
+├── verify                  the dispatcher
+├── vagrant/
+│   ├── Vagrantfile         the three-node lab on VirtualBox
+│   ├── lab.ps1             the Windows wrapper: up / snap / check / break
+│   └── provision/          what each node needs, and nothing a lab teaches
+├── lib/
+│   ├── verify-lib.sh       the check harness (pass/fail, scoring, reboot proof)
+│   └── ansible-lib.sh      additions for the Month 2 labs
+├── break/
+│   ├── break.sh            the single-cause saboteur
+│   ├── break-advanced.sh   the advanced saboteur — DO NOT READ IT
+│   ├── break-ansible.sh    the Month 2 saboteur
+│   └── incident.sh         the work-order composer — DO NOT READ IT EITHER
+├── labs/
+│   ├── env-check.sh        00-Lab-Environment acceptance test
+│   ├── lab-1.1.sh … 4.2    the RHCSA labs
+│   ├── breakfix-health.sh  post-repair health check for every break.sh fault
+│   ├── breakfix-advanced.sh   the ten advanced drills
+│   ├── incident-check.sh   grades a whole incident, against its SLA
+│   ├── mock-ex200-a.sh     mock graders
+│   ├── lab-5.1.sh … 7.5    the Ansible labs
+│   ├── scenario-1.sh … 5   Week 8 scenarios
+│   └── mock-ex294-a.sh
+└── dist/                   generated by ./verify bundle — not in git
+```
 
 ## Adding a check
 
@@ -192,8 +238,3 @@ summary
 captured output is shown so you can see what the machine actually said. `-p`
 marks a check as reboot-sensitive. Put the logic in a named function when it
 needs more than one line — that keeps quoting sane and the intent readable.
-
-## Licence
-
-Same licence as the rest of this repository. Use them, fork them, break your own
-machines with them.

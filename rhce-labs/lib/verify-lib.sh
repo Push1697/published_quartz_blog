@@ -34,6 +34,7 @@ V_VERBOSE=${VERIFY_VERBOSE:-0}
 V_MUTATE=${VERIFY_MUTATE:-1}
 V_AFTER_REBOOT=0
 V_BLIND=${VERIFY_BLIND:-0}
+V_HARD=${VERIFY_HARD:-0}; export V_HARD
 V_CHECK_N=0
 V_LAST_OUT=""
 V_STATE_DIR=""; V_BOOT_ID=""; V_LAST_PASS_BOOT=""
@@ -56,6 +57,7 @@ _v_parse_args() {
       --mutate)       V_MUTATE=1 ;;
       --after-reboot) V_AFTER_REBOOT=1 ;;
       --blind)        V_BLIND=1 ;;
+      --hard)         V_HARD=1; export V_HARD ;;
       --no-color)     C_RESET=; C_BOLD=; C_DIM=; C_RED=; C_GREEN=; C_YELLOW=; C_BLUE=; C_CYAN= ;;
       -h|--help)      _v_usage; exit 0 ;;
       *)              V_ARGS+=("$1") ;;
@@ -71,6 +73,9 @@ _v_usage() {
   echo "      --no-mutate     skip checks that create or delete anything"
   echo "      --after-reboot  refuse to run unless the machine booted recently"
   echo "      --blind         report pass/fail only, without saying what was checked"
+  echo "      --hard          exam conditions: no diagnostics on failure, warnings"
+  echo "                      count as failures, tighter tolerances, and a pass"
+  echo "                      requires proof it survived a reboot"
   echo "      --no-color      plain output (also honoured via NO_COLOR=1)"
   echo "  -h, --help          this text"
   echo
@@ -139,6 +144,7 @@ lab_init() {
     echo "${C_YELLOW}   Note: written for '$want_host', running on '$(_v_host)'.${C_RESET}"
   fi
   ((V_MUTATE)) || echo "${C_DIM}   --no-mutate: checks that touch the system will be skipped.${C_RESET}"
+  ((V_HARD)) && echo "${C_RED}   HARD MODE: no diagnostics, warnings fail, and a pass needs a reboot.${C_RESET}"
   echo
   trap _v_run_cleanup EXIT
 }
@@ -183,6 +189,14 @@ _v_result() {   # _v_result PASS|FAIL|WARN|SKIP|MANUAL persist desc [detail]
     SKIP)   tag="${C_DIM}SKIP${C_RESET}";    V_SKIP=$((V_SKIP + 1)) ;;
     MANUAL) tag="${C_CYAN}CHECK${C_RESET}";  V_MANUAL=$((V_MANUAL + 1)) ;;
   esac
+  # Hard mode: a warning is a failure, and you get the verdict without the
+  # evidence — same as an exam, where nothing tells you which way it went wrong.
+  if ((V_HARD)) && [[ $kind == WARN ]]; then
+    kind=FAIL; tag="${C_RED}FAIL${C_RESET}"
+    V_WARN=$((V_WARN - 1)); V_FAIL=$((V_FAIL + 1)); V_SECTION_FAIL=1
+    V_FAILED_LINES+=("$desc")
+  fi
+  if ((V_HARD)); then detail=""; fi
   if ((persist)); then mark=" ${C_CYAN}[P]${C_RESET}"; else mark=""; fi
   if ((V_BLIND)); then
     # Blind mode: say whether it passed, never what was examined. For the
@@ -193,7 +207,9 @@ _v_result() {   # _v_result PASS|FAIL|WARN|SKIP|MANUAL persist desc [detail]
   fi
   echo "  [$tag] ${desc}${mark}"
   [[ -n $detail ]] && echo "        ${C_DIM}${detail}${C_RESET}"
-  if [[ $kind == FAIL && -n ${V_LAST_OUT//[[:space:]]/} ]]; then
+  if ((V_HARD)); then
+    return 0
+  elif [[ $kind == FAIL && -n ${V_LAST_OUT//[[:space:]]/} ]]; then
     _v_show_out "$V_LAST_OUT"
   elif ((V_VERBOSE)) && [[ $kind == PASS && -n ${V_LAST_OUT//[[:space:]]/} ]]; then
     _v_show_out "$V_LAST_OUT" 3
@@ -395,7 +411,10 @@ size_gib()     { local b; b=$(lsblk -bno SIZE "$1" 2>/dev/null | head -1)
 df_gib()       { df -B1 --output=size "$1" 2>/dev/null | tail -1 |
                  awk '{ printf "%.1f", $1 / 1073741824 }'; }
 approx()       { # approx <value> <target> <tolerance>   → 0 when |value-target| <= tol
-                 awk -v v="${1:-0}" -v t="$2" -v d="$3" 'BEGIN { exit !(v >= t - d && v <= t + d) }'; }
+                 # Hard mode halves the tolerance: "about 4 GiB" stops meaning 3.4.
+                 local d="$3"
+                 ((${V_HARD:-0})) && d=$(awk -v x="$3" 'BEGIN { printf "%.3f", x / 2 }')
+                 awk -v v="${1:-0}" -v t="$2" -v d="$d" 'BEGIN { exit !(v >= t - d && v <= t + d) }'; }
 
 # bool_persist <name>  → the persisted (not merely runtime) value of an SELinux boolean
 bool_persist() {
@@ -525,6 +544,17 @@ summary() {
   fi
 
   # Reboot evidence — the exam grades after a restart, so the harness tracks it.
+  if ((V_HARD && V_FAIL == 0 && V_PASS > 0)) &&
+     [[ -z $V_LAST_PASS_BOOT || $V_LAST_PASS_BOOT == "$V_BOOT_ID" ]]; then
+    echo
+    echo "  ${C_RED}HARD MODE: every check passed, but not across a reboot.${C_RESET}"
+    echo "  ${C_DIM}That is not a pass here. Reboot and run this again — if it still${C_RESET}"
+    echo "  ${C_DIM}passes, it counts. Persistence is the thing being tested.${C_RESET}"
+    printf '%s' "$V_BOOT_ID" > "$V_STATE_DIR/lab-$V_LAB.boot" 2>/dev/null || true
+    echo
+    return 1
+  fi
+
   if ((V_FAIL == 0 && V_PASS > 0)); then
     if [[ -n $V_LAST_PASS_BOOT && $V_LAST_PASS_BOOT != "$V_BOOT_ID" ]]; then
       echo
