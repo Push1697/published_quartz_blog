@@ -73,6 +73,18 @@ To run or preview it by hand, use the vault repository's **Actions ▸ Publish
 garden notes ▸ Run workflow** (tick *dry run* to list what would publish without
 changing anything).
 
+## Images and video
+
+Embed media the normal Obsidian way, `![[diagram.webp|alt text]]` or
+`![alt text](diagram.webp)`, with the file anywhere in the vault (the attachment
+folder is `3-Resources/System/Attachments`). When the note publishes, the files it
+embeds are copied to `content/attachments/` and Quartz resolves them by file name,
+just as Obsidian does. Give attachments unique, descriptive file names, because two
+files with the same name are ambiguous to both tools.
+
+Allowed types: png, jpg, jpeg, gif, webp, avif, svg, bmp, mp4, webm, mov. Prefer
+WebP for screenshots and diagrams, and keep animated loops short.
+
 One-time setup: a fine-grained PAT with **Contents: read and write** on
 `Push1697/published_quartz_blog`, stored in the **vault** repository as the secret
 `GARDEN_PUBLISH_TOKEN`.
@@ -109,6 +121,9 @@ The push triggers `.github/workflows/deploy.yml` on branch `v4`.
 ## Safety model
 
 - Only Markdown notes containing both public flags in YAML frontmatter are copied.
+- Media is copied only when a published note embeds it, and only for the allowed
+  media types. Attachments of private notes never leave the vault, and an image
+  stops being published as soon as no published note embeds it.
 - `[[Wikilinks]]` between published notes are rewritten to the published slug,
   keeping the original text as the display alias — the publisher renames notes on
   the way out, so unrewritten links would 404. Links to notes that are **not**

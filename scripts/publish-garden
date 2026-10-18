@@ -192,7 +192,54 @@ for i in "${!sel_note[@]}"; do
   ((published_count += 1))
 done
 
-echo "Selected $published_count public note(s), plus the curated homepage."
+# Pass 3: copy the media a published note embeds (![[x.webp]] or ![](x.webp)).
+# Only allowlisted media types, and only files a published note references, so
+# a private note's attachments never leave the vault. They land in
+# content/attachments/, where Quartz's shortest-path link resolution finds them
+# by file name, the same way Obsidian does.
+is_media() {
+  case "${1,,}" in
+    *.png|*.jpg|*.jpeg|*.gif|*.webp|*.avif|*.svg|*.bmp|*.mp4|*.webm|*.mov) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+embedded_media() {
+  { grep -oE '!\[\[[^]|#]+' "$1" | sed 's/^!\[\[//'
+    grep -oE '!\[[^]]*\]\([^) ]+' "$1" | sed -E 's/^!\[[^]]*\]\(//' | grep -vE '^[a-zA-Z]+://'
+  } 2>/dev/null || true
+}
+
+declare -A media_by_name copied_media
+while IFS= read -r -d '' file; do
+  name="${file##*/}"
+  is_media "$name" || continue
+  [[ -n "${media_by_name[$name]:-}" ]] || media_by_name["$name"]="$file"
+done < <(find "$VAULT_ROOT" \
+  -type d \( -name .git -o -name .obsidian -o -name .trash \) -prune -o \
+  -type f -print0 | sort -z)
+
+media_count=0
+for i in "${!sel_note[@]}"; do
+  while IFS= read -r ref; do
+    name="${ref##*/}"
+    name="${name//%20/ }"
+    is_media "$name" || continue
+    [[ -n "${copied_media[$name]:-}" ]] && continue
+    source_file="${media_by_name[$name]:-}"
+    if [[ -z "$source_file" ]]; then
+      printf '  missing  %s  (embedded by %s)\n' "$name" "${sel_rel[$i]}" >&2
+      continue
+    fi
+    mkdir -p "$STAGING_ROOT/content/attachments"
+    cp -p -- "$source_file" "$STAGING_ROOT/content/attachments/$name"
+    copied_media["$name"]=1
+    printf '  attach   attachments/%s  ←  %s\n' "$name" "${sel_rel[$i]}"
+    ((media_count += 1))
+  done < <(embedded_media "${sel_note[$i]}")
+done
+
+echo "Selected $published_count public note(s) and $media_count embedded media file(s), plus the curated homepage."
 
 rsync_args=(-a --delete --itemize-changes)
 if "$DRY_RUN"; then

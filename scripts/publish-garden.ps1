@@ -254,8 +254,49 @@ try {
         $publishedCount++
     }
 
+    # Pass 3: copy the media a published note embeds (![[x.webp]] or ![](x.webp)).
+    # Only allowlisted media types, and only files a published note references,
+    # so a private note's attachments never leave the vault. They land in
+    # content/attachments/, where Quartz's shortest-path link resolution finds
+    # them by file name, the same way Obsidian does.
+    $mediaExt = @('.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg', '.bmp', '.mp4', '.webm', '.mov')
+    $mediaByName = @{}
+    Get-ChildItem -LiteralPath $vaultRoot -Recurse -File -Force |
+        Where-Object {
+            $rel  = $_.FullName.Substring($vaultRoot.Length).TrimStart('\', '/')
+            $head = ($rel -split '[\\/]')[0]
+            ($excluded -notcontains $head) -and ($mediaExt -contains $_.Extension.ToLowerInvariant())
+        } |
+        Sort-Object FullName |
+        ForEach-Object { if (-not $mediaByName.ContainsKey($_.Name)) { $mediaByName[$_.Name] = $_.FullName } }
+
+    $copiedMedia = @{}
+    $mediaCount = 0
+    foreach ($item in $selected) {
+        $text = $item.Lines -join "`n"
+        $refs = @()
+        $refs += [regex]::Matches($text, '!\[\[([^\]|#]+)') | ForEach-Object { $_.Groups[1].Value }
+        $refs += [regex]::Matches($text, '!\[[^\]]*\]\(([^)\s]+)') | ForEach-Object { $_.Groups[1].Value } |
+            Where-Object { $_ -notmatch '^[a-zA-Z]+://' }
+        foreach ($ref in $refs) {
+            $name = (($ref -split '/')[-1]) -replace '%20', ' '
+            if ($mediaExt -notcontains [System.IO.Path]::GetExtension($name).ToLowerInvariant()) { continue }
+            if ($copiedMedia.ContainsKey($name)) { continue }
+            if (-not $mediaByName.ContainsKey($name)) {
+                Write-Warning ("missing  {0}  (embedded by {1})" -f $name, $item.RelativePath)
+                continue
+            }
+            $attachDir = Join-Path $stagingRoot 'attachments'
+            if (-not (Test-Path -LiteralPath $attachDir)) { New-Item -ItemType Directory -Path $attachDir -Force | Out-Null }
+            Copy-Item -LiteralPath $mediaByName[$name] -Destination (Join-Path $attachDir $name) -Force
+            $copiedMedia[$name] = $true
+            Write-Host ("  attach   attachments/{0}  <-  {1}" -f $name, $item.RelativePath) -ForegroundColor Green
+            $mediaCount++
+        }
+    }
+
     Write-Host ''
-    Write-Host "Selected $publishedCount public note(s), plus the curated homepage." -ForegroundColor Yellow
+    Write-Host "Selected $publishedCount public note(s) and $mediaCount embedded media file(s), plus the curated homepage." -ForegroundColor Yellow
 
     # --- Mirror staging -> content (equivalent to rsync --delete) -------------
     $staged = @{}
