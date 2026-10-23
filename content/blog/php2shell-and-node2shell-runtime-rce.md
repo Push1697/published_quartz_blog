@@ -12,10 +12,65 @@ tags:
   - runbook
 publish: true
 garden: true
-description: "CVE-2026-109618, CVE-2026-109619 (PHP2Shell) and CVE-2026-111497 (Node2Shell) — unauthenticated RCE in PHP and Node.js runtimes. CVSS 9.2. Root causes, attack chains, and step-by-step remediation runbook."
+description: "CVE-2026-109618, CVE-2026-109619 (PHP2Shell) and CVE-2026-111497 (Node2Shell) — unauthenticated RCE in PHP and Node.js runtimes. CVSS 9.2. Interactive animated attack flow, root causes, and step-by-step remediation runbook."
 ---
 
 # PHP2Shell and Node2Shell: The Runtime-Level RCE You Can't Code Around
+
+<div class="overflowbyte-threat-banner" style="position: relative; margin: 1.5rem 0; padding: 1.25rem 1.5rem; border-radius: 12px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%); border: 1px solid rgba(239, 68, 68, 0.35); box-shadow: 0 0 30px rgba(239, 68, 68, 0.15);">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <span style="position: relative; display: flex; height: 12px; width: 12px;">
+        <span style="animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; position: absolute; display: inline-flex; height: 100%; width: 100%; border-radius: 9999px; background-color: #ef4444; opacity: 0.75;"></span>
+        <span style="position: relative; display: inline-flex; border-radius: 9999px; height: 12px; width: 12px; background-color: #dc2626;"></span>
+      </span>
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: #fca5a5; letter-spacing: 0.08em; text-transform: uppercase;">
+        CRITICAL RUNTIME ZERO-DAY · CVSS 9.2 · EXPLOITED IN THE WILD
+      </span>
+    </div>
+    <a href="/static/php2shell-node2shell.html" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.9rem; font-size: 0.82rem; font-weight: 600; color: #5ce1ff; background: rgba(92, 225, 255, 0.12); border: 1px solid rgba(92, 225, 255, 0.3); border-radius: 6px; text-decoration: none;">
+      <span>Open Fullscreen Experience ↗</span>
+    </a>
+  </div>
+</div>
+
+<style>
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.25); border-color: rgba(99, 102, 241, 0.4); }
+  50% { box-shadow: 0 0 35px rgba(92, 225, 255, 0.4); border-color: rgba(92, 225, 255, 0.6); }
+}
+.interactive-experience-wrapper {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+</style>
+
+<!-- Embedded Interactive Animated Blog Experience -->
+<div class="interactive-experience-wrapper" style="margin: 2rem 0; border-radius: 14px; overflow: hidden; background: #070b16; border: 1px solid rgba(99, 102, 241, 0.35); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);">
+  <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div style="display: flex; gap: 6px;">
+        <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+        <span style="width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; display: inline-block;"></span>
+        <span style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+      </div>
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; color: #94a3b8;">
+        OverflowByte Interactive Security Lab · PHP2Shell & Node2Shell Live Simulation
+      </span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <a href="/static/php2shell-node2shell.html" target="_blank" rel="noopener noreferrer" title="Launch full screen in a new window" style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #5ce1ff; text-decoration: none; padding: 0.25rem 0.6rem; border-radius: 4px; background: rgba(92, 225, 255, 0.08); border: 1px solid rgba(92, 225, 255, 0.2);">
+        Full Window ↗
+      </a>
+    </div>
+  </div>
+  <iframe src="/static/php2shell-node2shell.html" style="width: 100%; height: 850px; border: none; display: block; background: #070b16;" title="PHP2Shell and Node2Shell Interactive Guide" loading="eager" allow="fullscreen; clipboard-write"></iframe>
+</div>
 
 > [!danger] Critical Advisory — 23 October 2026 · CVSS 9.2
 > Two critical Remote Code Execution (RCE) vulnerabilities landed on the two most widely deployed web runtimes on the planet in the exact same week. 
