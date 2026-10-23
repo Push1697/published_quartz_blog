@@ -29,6 +29,7 @@ import KnowledgeNav from "./KnowledgeNav"
 import PublishedNotes from "./PublishedNotes"
 import RelatedNotes from "./RelatedNotes"
 import SeriesNav from "./SeriesNav"
+import TopNav from "./TopNav"
 
 export {
   ArticleTitle,
@@ -62,4 +63,5 @@ export {
   PublishedNotes,
   RelatedNotes,
   SeriesNav,
+  TopNav,
 }

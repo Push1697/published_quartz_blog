@@ -19,15 +19,12 @@ export default ((userOpts?: Partial<SearchOptions>) => {
     const searchPlaceholder = i18n(cfg.locale).components.search.searchBarPlaceholder
     return (
       <div class={classNames(displayClass, "search")}>
-        <button class="search-button">
-          <svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.9 19.7">
-            <title>Search</title>
-            <g class="search-path" fill="none">
-              <path stroke-linecap="square" d="M18.5 18.3l-5.4-5.4" />
-              <circle cx="8" cy="8" r="7" />
-            </g>
+        <button class="search-button" aria-label="Search articles">
+          <svg role="img" aria-hidden="true" class="search-icon" viewBox="0 0 24 22">
+            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61.0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
           </svg>
-          <p>{i18n(cfg.locale).components.search.title}</p>
+          <span class="search-text">Search articles</span>
+          <kbd class="search-kbd">/</kbd>
         </button>
         <div class="search-container">
           <div class="search-space">

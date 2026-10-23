@@ -29,15 +29,15 @@ interface BreadcrumbOptions {
 }
 
 const defaultOptions: BreadcrumbOptions = {
-  spacerSymbol: "❯",
-  rootName: "Home",
+  spacerSymbol: "/",
+  rootName: "HOME",
   resolveFrontmatterTitle: true,
   showCurrentPage: true,
 }
 
 function formatCrumb(displayName: string, baseSlug: FullSlug, currentSlug: SimpleSlug): CrumbData {
   return {
-    displayName: displayName.replaceAll("-", " "),
+    displayName: displayName.replaceAll("-", " ").toUpperCase(),
     path: resolveRelative(baseSlug, currentSlug),
   }
 }

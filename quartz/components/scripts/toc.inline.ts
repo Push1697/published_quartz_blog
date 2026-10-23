@@ -31,6 +31,17 @@ function setupToc() {
     if (!button || !content) return
     button.addEventListener("click", toggleToc)
     window.addCleanup(() => button.removeEventListener("click", toggleToc))
+
+    const copyBtn = toc.querySelector("#toc-copy-link-btn")
+    if (copyBtn) {
+      const onCopy = () => {
+        navigator.clipboard.writeText(window.location.href)
+        copyBtn.classList.add("copied")
+        setTimeout(() => copyBtn.classList.remove("copied"), 2000)
+      }
+      copyBtn.addEventListener("click", onCopy)
+      window.addCleanup(() => copyBtn.removeEventListener("click", onCopy))
+    }
   }
 }
 

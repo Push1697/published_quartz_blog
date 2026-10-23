@@ -1,36 +1,81 @@
-.clipboard-button {
-  position: absolute;
-  display: flex;
-  float: right;
-  right: 0;
-  padding: 0.4rem;
-  margin: 0.3rem;
-  color: var(--gray);
-  border-color: var(--dark);
-  background-color: var(--light);
-  border: 1px solid;
-  border-radius: 5px;
-  opacity: 0;
-  transition: 0.2s;
+pre:not(:has(code.mermaid)) {
+  position: relative;
+  border: 1px solid var(--lightgray);
+  border-radius: 10px;
+  background: #090e17;
+  margin: 1.5rem 0;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 
-  & > svg {
-    fill: var(--light);
-    filter: contrast(0.3);
+  .code-terminal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: #0f172a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-family: var(--codeFont);
+    font-size: 0.8rem;
+    user-select: none;
+
+    .code-terminal-title {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-weight: 600;
+      color: #cbd5e1;
+
+      .terminal-prompt-icon {
+        color: var(--secondary);
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+
+      .terminal-label {
+        letter-spacing: 0.03em;
+        text-transform: capitalize;
+      }
+    }
+
+    .clipboard-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.3rem 0.5rem;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 5px;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+
+      &.copied {
+        color: #38bdf8;
+        border-color: #38bdf8;
+      }
+    }
   }
 
-  &:hover {
-    cursor: pointer;
-    border-color: var(--secondary);
-  }
-
-  &:focus {
-    outline: 0;
+  code {
+    display: block;
+    padding: 1.15rem 1.25rem;
+    overflow-x: auto;
+    font-family: var(--codeFont);
+    font-size: 0.9rem;
+    line-height: 1.65;
+    background: transparent !important;
+    color: #e2e8f0;
   }
 }
 
-pre {
-  &:hover > .clipboard-button {
-    opacity: 1;
-    transition: 0.2s;
-  }
+:root[saved-theme="light"] pre:not(:has(code.mermaid)) {
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
